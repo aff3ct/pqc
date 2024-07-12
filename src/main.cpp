@@ -3,14 +3,6 @@
 // #include <cstdlib>
 // #include <verilated.h>
 // #include <verilated_vcd_c.h>
-// #include "VTop_Level.h"
-
-// #include "VerilatorSimulation.hpp"
-// #include "MySource.hpp"
-#include "Comparator/Comparator.hpp"
-#include "RandomFixedWeight/RandomFixedWeight.hpp"
-
-// #include "SerialPort.hpp"
 
 #include <vector>
 #include <streampu.hpp>
@@ -18,9 +10,33 @@
 
 #include <flint.h>
 #include <fmpz.h>		/* large integers */
+#include <fq.h>		/* finite fields */
+
+// #include flint/fq_poly.h"	/* pol. in finite fields */
+// #include "flint/fmpz_poly.h"	/* pol. in integers */
+// #include "flint/fmpz_vec.h"	/* vectors integers */
+// #include "flint/fq_vec.h"	/* vectors finite fields */
+// #include "flint/perm.h"		/* permutations */
+// #include "flint/fq_mat.h"	/* matrix / finite fields */
+
+
+
+// #include "VTop_Level.h"
+// #include "VerilatorSimulation.hpp"
+// #include "MySource.hpp"
+#include "Modules/Comparator/Comparator.hpp"
+#include "Modules/RandomFixedWeight/RandomFixedWeight.hpp"
+
+// #include "SerialPort.hpp"
+
+#include "Tools/tools.hpp"
+#include "Tools/codes.hpp"
+#include "Tools/CM_secret_key.hpp"
 
 using namespace spu;
 using namespace spu::module;
+
+using namespace std;
 
 // #define VERIF_START_TIME 7
 // vluint64_t sim_time = 0;
@@ -35,64 +51,99 @@ using namespace spu::module;
 int main(int argc, char** argv, char** env) {
 
     fmpz_t p;
+    slong d;
+    fq_ctx_t ctx, ctx_q;
+    
     fmpz_init_set_ui(p, 2);
-    flint_printf("test");
-  
-    const int FRAME_SIZE = 20;
-    const int WEIGHT = 10;
-    const int TAU = 20;
-    const int N = 25;
+    d = 7;
+    fq_ctx_init_conway(ctx, p, d, "X");
+    fq_ctx_init_conway(ctx_q, p, 1, "Y");
 
-    module::Initializer   <int> initializer(FRAME_SIZE);
-    module::Incrementer   <int> incr1(FRAME_SIZE);
-    module::Finalizer     <int> finalizer(FRAME_SIZE);
+    int deg = 15; 
+    slong len = 128;
+    int t = deg/2;
+    int tau = 20;
 
-    // // module::Finalizer     <int> finalizer_hw(FRAME_SIZE);
-    // module::MySource    my_source(FRAME_SIZE);
 
-    module::Comparator comp(FRAME_SIZE);
-    module::RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT, N, TAU);
+    CM_secret_key SK = CM_secret_key(len, &ctx);
+
+
+    int a = _fq_vec_print(SK.get_alpha(), len, ctx); 
+
+    cout << " "  << endl;
     
-    // module::Comparator comp_fpga(FRAME_SIZE);
-    // VerilatorSimulation sim(FRAME_SIZE);
-    // // SerialPort serial("/dev/tty.usbserial-210292ABF7641", 115200, FRAME_SIZE);
+    fq_poly_t& h  = SK.g;
+    // h = SK.get_g();
+    fq_poly_print_pretty(h, "X",  ctx);
+    cout << " "  << endl;
+
+    fq_poly_one(h, ctx);
+    fq_poly_print_pretty(h, "X",  ctx);
+    cout << " "  << endl;
+
+    fq_poly_print_pretty(SK.g, "X",  ctx);
+    cout << " "  << endl;
+
+
+
+
+    // AFTER THAT :     TESTS WITH MODULES
+    
+    // const int FRAME_SIZE = 20;
+    // const int WEIGHT = 10;
+    // const int TAU = 20;
+    // const int N = 25;
+
+    // module::Initializer   <int> initializer(FRAME_SIZE);
+    // module::Incrementer   <int> incr1(FRAME_SIZE);
+    // module::Finalizer     <int> finalizer(FRAME_SIZE);
+
+    // // // module::Finalizer     <int> finalizer_hw(FRAME_SIZE);
+    // // module::MySource    my_source(FRAME_SIZE);
+
+    // module::Comparator comp(FRAME_SIZE);
+    // module::RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT, N, TAU);
+    
+    // // module::Comparator comp_fpga(FRAME_SIZE);
+    // // VerilatorSimulation sim(FRAME_SIZE);
+    // // // SerialPort serial("/dev/tty.usbserial-210292ABF7641", 115200, FRAME_SIZE);
 
     
 
-    initializer   ["initialize::out" ] = incr1           ["increment::in"];
-    // my_source   ["generate::output" ] = sim             ["simulate::input"];
-    // // my_source   ["generate::output" ] = serial          ["write::input"];
+    // initializer   ["initialize::out" ] = incr1           ["increment::in"];
+    // // my_source   ["generate::output" ] = sim             ["simulate::input"];
+    // // // my_source   ["generate::output" ] = serial          ["write::input"];
 
-    // sim         ["simulate::output" ] = comp_sim            ["compare::input2"];
-    // comp_sim    ["compare::output"  ] = finalizer_sw        ["finalize::in"];
+    // // sim         ["simulate::output" ] = comp_sim            ["compare::input2"];
+    // // comp_sim    ["compare::output"  ] = finalizer_sw        ["finalize::in"];
     
-    comp ["compare::input1"] = incr1     ["increment::out"];
-    comp ["compare::input2"] = incr1     ["increment::out"];
+    // comp ["compare::input1"] = incr1     ["increment::out"];
+    // comp ["compare::input2"] = incr1     ["increment::out"];
 
-    randfixed["random_fixed_weight::input"] = comp["compare::output"];
+    // randfixed["random_fixed_weight::input"] = comp["compare::output"];
     
     
-    randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
+    // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
 
-    // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"];
-    // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"];
-    // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"];
+    // // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"];
+    // // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"];
+    // // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"];
 
-    std::vector<runtime::Task*> first = {&initializer("initialize")};
+    // std::vector<runtime::Task*> first = {&initializer("initialize")};
 
-    runtime::Sequence seq(first);
+    // runtime::Sequence seq(first);
 
-    std::ofstream file("graph.dot");
-    seq.export_dot(file);
+    // std::ofstream file("graph.dot");
+    // seq.export_dot(file);
 
-    for (auto lt : seq.get_tasks_per_types())
-        for (auto t : lt)
-        {
-            t->set_stats(true);
-            t->set_debug(true);
-        }
+    // for (auto lt : seq.get_tasks_per_types())
+    //     for (auto t : lt)
+    //     {
+    //         t->set_stats(true);
+    //         t->set_debug(true);
+    //     }
 
-    seq.exec_seq();
     // seq.exec_seq();
+    // // seq.exec_seq();
 
 }
