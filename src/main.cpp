@@ -32,6 +32,7 @@
 #include "Tools/tools.hpp"
 #include "Tools/codes.hpp"
 #include "Tools/CM_secret_key.hpp"
+#include "Tools/CM_public_key.hpp"
 
 using namespace spu;
 using namespace spu::module;
@@ -66,7 +67,7 @@ int main(int argc, char** argv, char** env) {
 
 
     CM_secret_key SK = CM_secret_key(len, &ctx);
-
+    
 
     int a = _fq_vec_print(SK.get_alpha(), len, ctx); 
 
@@ -84,9 +85,10 @@ int main(int argc, char** argv, char** env) {
     fq_poly_print_pretty(SK.g, "X",  ctx);
     cout << " "  << endl;
 
-
-
-
+    CM_public_key PK = CM_public_key(len, d, t, &ctx_q);
+    fq_mat_t& M = PK.T;
+    
+   
     // AFTER THAT :     TESTS WITH MODULES
     
     // const int FRAME_SIZE = 20;

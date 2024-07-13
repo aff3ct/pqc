@@ -2,15 +2,15 @@
 #define TOOLS_H
 
 
-#include "flint.h"
-#include "fmpz.h"	/* large integers */
-#include "fq.h"		/* finite fields */
-#include "fq_poly.h"	/* pol. in finite fields */
-#include "fmpz_poly.h"	/* pol. in integers */
-#include "fmpz_vec.h"	/* vectors integers */
-#include "fq_vec.h"	/* vectors finite fields */
-#include "fq_mat.h"	/* matrix / finite fields */
-#include "perm.h"	/* permutations */
+#include <flint/flint.h>
+#include <flint/fmpz.h>	/* large integers */
+#include <flint/fq.h>		/* finite fields */
+#include <flint/fq_poly.h>	/* pol. in finite fields */
+#include <flint/fmpz_poly.h>	/* pol. in integers */
+#include <flint/fmpz_vec.h>	/* vectors integers */
+#include <flint/fq_vec.h>	/* vectors finite fields */
+#include <flint/fq_mat.h>	/* matrix / finite fields */
+#include <flint/perm.h>	/* permutations */
 
 
 void fisher_yates(int* perm, const int n);
