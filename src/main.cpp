@@ -72,7 +72,7 @@ int main(int argc, char** argv, char** env) {
     int a = _fq_vec_print(SK.get_alpha(), len, ctx); 
 
     cout << " "  << endl;
-    
+
     fq_poly_t& h  = SK.g;
     // h = SK.get_g();
     fq_poly_print_pretty(h, "X",  ctx);
@@ -81,14 +81,40 @@ int main(int argc, char** argv, char** env) {
     fq_poly_one(h, ctx);
     fq_poly_print_pretty(h, "X",  ctx);
     cout << " "  << endl;
-
+    
     fq_poly_print_pretty(SK.g, "X",  ctx);
     cout << " "  << endl;
 
+
+    FLINT_TEST_INIT(state);
+    SK.keygen(t, state);
+
+
+    cout << "after keygen" << endl;
+    
+
+
+    cout << "after keygen" << endl;
+
+    fq_struct* beta = _fq_vec_init(len, ctx);
+    _fq_vec_set(beta, SK.get_alpha(), len, ctx);
+    a = _fq_vec_print(SK.get_alpha(), len, ctx);
+    for (int i = 0; i < len; i++) {
+	fq_print_pretty(&beta[i], ctx);
+	cout  <<  endl;
+    }
+
+    cout << " "  << endl;
+    
+    fq_poly_print_pretty(SK.g, "Y",  ctx);
+    cout << " "  << endl;
+
+    
     CM_public_key PK = CM_public_key(len, d, t, &ctx_q);
     fq_mat_t& M = PK.T;
+
+
     
-   
     // AFTER THAT :     TESTS WITH MODULES
     
     // const int FRAME_SIZE = 20;

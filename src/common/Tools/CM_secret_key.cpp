@@ -29,6 +29,17 @@ CM_secret_key:: get_alpha() const {
     return this->alpha;
 }
 
+void
+CM_secret_key:: keygen(const int t, flint_rand_t state) {
+    /* n random elements */
+    fq_vec_rand_distinct_2(this->alpha, this->n, *(this->ctx), state);
+    
+    /* irr pol over Fq (="ctx") without any root in alpha */
+    cm_fq_poly_irr_pol(this->g, t, this->alpha, this->n, *(this->ctx),
+		       state);
+}
+
+
 // fq_poly_t&
 // CM_secret_key:: get_g() const {
 //     return g;

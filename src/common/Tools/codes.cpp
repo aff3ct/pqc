@@ -297,7 +297,7 @@ Goppa_parity_check(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, cons
     for (j = 0; j < m; j++) {
 	fq_mat_entry_set(res, 0, j, &beta[j], ctx);
     }
-
+    
     /* computes the following lines by multiplying by alpha_i */
     for (i = 1; i < n; i++) {
 	for (j = 0; j < m; j++) {

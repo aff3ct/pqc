@@ -12,13 +12,16 @@ private:
     fq_struct* alpha;
 
 public:
+    fq_poly_t g;
+
     CM_secret_key(int m, fq_ctx_t* ctx);
     ~CM_secret_key();
 
     int get_n() const;
     fq_struct* get_alpha() const;
 
-    fq_poly_t g;
+
+    void keygen(const int t, flint_rand_t state);
     // fq_poly_t& get_g() const;
 };
 
