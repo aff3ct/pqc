@@ -87,34 +87,36 @@ int main(int argc, char** argv, char** env) {
 
 
     FLINT_TEST_INIT(state);
-    SK.keygen(t, state);
 
+    int res = 0;
 
-    cout << "after keygen" << endl;
+    while (!res) {
+	SK.keygen(t, state);
+   
+	cout << "after keygen" << endl;
+
+	// fq_struct* beta = _fq_vec_init(len, ctx);
+	// _fq_vec_set(beta, SK.get_alpha(), len, ctx);
+	// a = _fq_vec_print(SK.get_alpha(), len, ctx);
+	// for (int i = 0; i < len; i++) {
+	//     fq_print_pretty(&beta[i], ctx);
+	//     cout  <<  endl;
+	// }
     
+	// cout << " "  << endl;
+    
+	// fq_poly_print_pretty(SK.g, "Y",  ctx);
+	// cout << " "  << endl;
 
+    
+	CM_public_key PK = CM_public_key(len, d, t, &ctx_q);
+	// fq_mat_t& M = PK.T;
 
-    cout << "after keygen" << endl;
-
-    fq_struct* beta = _fq_vec_init(len, ctx);
-    _fq_vec_set(beta, SK.get_alpha(), len, ctx);
-    a = _fq_vec_print(SK.get_alpha(), len, ctx);
-    for (int i = 0; i < len; i++) {
-	fq_print_pretty(&beta[i], ctx);
-	cout  <<  endl;
+	res = PK.keygen(SK, ctx);
+	cout << "keygen success ? \n" << res << endl;
     }
-
-    cout << " "  << endl;
     
-    fq_poly_print_pretty(SK.g, "Y",  ctx);
-    cout << " "  << endl;
 
-    
-    CM_public_key PK = CM_public_key(len, d, t, &ctx_q);
-    fq_mat_t& M = PK.T;
-
-
-    
     // AFTER THAT :     TESTS WITH MODULES
     
     // const int FRAME_SIZE = 20;

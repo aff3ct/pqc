@@ -3,6 +3,7 @@
 
 #include "tools.hpp"
 #include "codes.hpp"
+#include "CM_secret_key.hpp"
 
 class CM_public_key {
 private:
@@ -20,6 +21,10 @@ public:
     int get_n() const;
     int get_m() const;
     int get_t() const;
+
+
+    
+    int keygen(const CM_secret_key sk, const fq_ctx_t ctx);
     // fq_mat_t get_T() const;
 };
 

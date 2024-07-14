@@ -29,6 +29,11 @@ CM_secret_key:: get_alpha() const {
     return this->alpha;
 }
 
+fq_ctx_t*
+CM_secret_key:: get_ctx() const {
+    return this->ctx;
+}
+
 void
 CM_secret_key:: keygen(const int t, flint_rand_t state) {
     /* n random elements */

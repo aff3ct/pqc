@@ -19,8 +19,8 @@ public:
 
     int get_n() const;
     fq_struct* get_alpha() const;
-
-
+    fq_ctx_t* get_ctx() const;
+    
     void keygen(const int t, flint_rand_t state);
     // fq_poly_t& get_g() const;
 };
