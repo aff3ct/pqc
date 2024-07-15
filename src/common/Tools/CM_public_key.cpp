@@ -36,29 +36,25 @@ CM_public_key:: get_t() const {
 }
 
 int
-CM_public_key::keygen(const CM_secret_key sk, const fq_ctx_t ctx) {
+CM_public_key::keygen(const CM_secret_key& sk, const fq_ctx_t& ctx) {
     fq_mat_t H, HH, T, I;
 
     // fq_ctx_t* ctx = sk.get_ctx();    
     /* compute parity check matrix over F_qᵐ */
     fq_mat_init(H, this->t, this->n, ctx);
     Goppa_parity_check(H, sk.get_alpha(), sk.g, ctx);
-
-    cout << "after parity check \n" << endl;
     
     /* expand parity check matrix */
     fq_mat_init(HH, (this->m)*(this->t), this->n, *(this->ctx_q));
     fq_matrix_expand(HH, H, ctx, *(this->ctx_q));
-
-    cout << "after expansion \n" << endl;
     
     int r = fq_mat_rref(HH, HH, *(this->ctx_q));
-    cout << "echelon form \n" << endl;
+    
     fq_mat_window_init(I, HH, 0, 0, this->t * this->m,
 		       (this->t) * (this->m), *(this->ctx_q));
-    cout << "after 1st window \n" << endl;
+    
     int b = fq_mat_is_one(I, *(this->ctx_q));
-    cout << "after check id \n" << endl;
+    
     /* printf("%d\n", b); */
     /* int ptt = fq_mat_print_pretty(T, ctx_q); */
     if (b) {
@@ -69,15 +65,12 @@ CM_public_key::keygen(const CM_secret_key sk, const fq_ctx_t ctx) {
 	fq_mat_window_clear(T, *(this->ctx_q));
     }
 
-    cout << "after if  \n" << endl;
     /* clear matrices */
     fq_mat_clear(H, ctx);
-    fq_mat_clear(HH,  *(this->ctx_q));
+    fq_mat_clear(HH, *(this->ctx_q));
     fq_mat_window_clear(I, *(this->ctx_q));
 
     
-    
-    cout << "after clear  \n" << endl;
     
     return b;
 }

@@ -24,7 +24,7 @@ public:
 
 
     
-    int keygen(const CM_secret_key sk, const fq_ctx_t ctx);
+    int keygen(const CM_secret_key& sk, const fq_ctx_t& ctx);
     // fq_mat_t get_T() const;
 };
 

@@ -2,6 +2,8 @@
 
 #include "tools.hpp"
 
+#include <iostream>
+
 CM_secret_key::CM_secret_key(int m, fq_ctx_t* ctx) {
     n = m;
     this->ctx = ctx;
@@ -14,6 +16,7 @@ CM_secret_key::CM_secret_key(int m, fq_ctx_t* ctx) {
 }
 
 CM_secret_key::~CM_secret_key() {
+    std::cerr << "In SK destructor! \n" << std::endl;
     _fq_vec_clear(this->alpha, this->n, *(this->ctx));
     fq_poly_clear((this->g), *(this->ctx));
 }

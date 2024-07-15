@@ -66,30 +66,34 @@ int main(int argc, char** argv, char** env) {
     int tau = 20;
 
 
-    CM_secret_key SK = CM_secret_key(len, &ctx);
+
     
 
-    int a = _fq_vec_print(SK.get_alpha(), len, ctx); 
+    // int a = _fq_vec_print(SK.get_alpha(), len, ctx); 
 
-    cout << " "  << endl;
+    // cout << " "  << endl;
 
-    fq_poly_t& h  = SK.g;
-    // h = SK.get_g();
-    fq_poly_print_pretty(h, "X",  ctx);
-    cout << " "  << endl;
+    // fq_poly_t& h  = SK.g;
+    // // h = SK.get_g();
+    // fq_poly_print_pretty(h, "X",  ctx);
+    // cout << " "  << endl;
 
-    fq_poly_one(h, ctx);
-    fq_poly_print_pretty(h, "X",  ctx);
-    cout << " "  << endl;
+    // fq_poly_one(h, ctx);
+    // fq_poly_print_pretty(h, "X",  ctx);
+    // cout << " "  << endl;
     
-    fq_poly_print_pretty(SK.g, "X",  ctx);
-    cout << " "  << endl;
+    // fq_poly_print_pretty(SK.g, "X",  ctx);
+    // cout << " "  << endl;
 
 
     FLINT_TEST_INIT(state);
 
+    CM_secret_key SK = CM_secret_key(len, &ctx);
+    CM_public_key PK = CM_public_key(len, d, t, &ctx_q);
+    
     int res = 0;
 
+    
     while (!res) {
 	SK.keygen(t, state);
    
@@ -109,10 +113,11 @@ int main(int argc, char** argv, char** env) {
 	// cout << " "  << endl;
 
     
-	CM_public_key PK = CM_public_key(len, d, t, &ctx_q);
+	
 	// fq_mat_t& M = PK.T;
 
 	res = PK.keygen(SK, ctx);
+	
 	cout << "keygen success ? \n" << res << endl;
     }
     
