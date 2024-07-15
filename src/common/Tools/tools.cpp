@@ -2,15 +2,17 @@
 #include <random>
 
 
-// #include "flint.h"
-// #include "fmpz.h"	/* large integers */
-// #include "fq.h"		/* finite fields */
-// #include "fq_poly.h"	/* pol. in finite fields */
-// #include "fmpz_poly.h"	/* pol. in integers */
-// #include "fmpz_vec.h"	/* vectors integers */
-// #include "fq_vec.h"	/* vectors finite fields */
-// #include "fq_mat.h"	/* matrix / finite fields */
-// #include "perm.h"	/* permutations */
+/* #include <flint/flint.h> */
+/* #include <flint/fmpz.h>		/\* large integers *\/ */
+/* #include <flint/fq.h>		/\* finite fields *\/ */
+
+/* #include "flint/fq_poly.h"	/\* pol. in finite fields *\/ */
+/* #include "flint/fmpz_poly.h"	/\* pol. in integers *\/ */
+/* #include "flint/fmpz_vec.h"	/\* vectors integers *\/ */
+/* #include "flint/fq_vec.h"	/\* vectors finite fields *\/ */
+/* #include "flint/perm.h"		/\* permutations *\/ */
+/* #include "flint/fq_mat.h"	/\* matrix / finite fields *\/ */
+
 
 #include "tools.hpp"
 
@@ -117,6 +119,33 @@ cm_gen_e(int* e, const int n, const int t, const int N, const int tau) {
 /* **************************************************************************** */
 /*                              FINITE FIELDS                                   */
 /* **************************************************************************** */
+
+
+/*
+  Go from finite field vec to integral vector
+  Assume a is 0 or 1 */
+void
+_fq_vec_2_int(int* res, const fq_struct* a, const int len, const fq_ctx_t ctx) {
+    fmpz_t tmp;
+    fmpz_init(tmp);
+    int b;
+    for (int i = 0 ; i < len; ++i) {
+	b = fq_get_fmpz(tmp, &a[i], ctx);
+	res[i] = fmpz_get_ui(tmp);
+    }
+}
+
+
+/*
+  Go from integral vector  to finite field vec 
+  Assume a is 0 or 1 */
+void
+_int_vec_2_fq(fq_struct* res, const int* a, const int len, const fq_ctx_t ctx) {
+    for (int i = 0 ; i < len; ++i) {
+	fq_set_ui(&res[i], a[i], ctx);
+    }
+}
+
 
 /* check repetitions in finite fields in a naive way */
 int
@@ -225,7 +254,7 @@ fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  bet
    together with the roots alpha Γ(alpha, res)  
 */
 void
-cm_fq_poly_irr_pol(fq_poly_t res, const int deg, const fq_struct* alpha, const int len,
+cm_fq_poly_irr_pol(fq_poly_t& res, const int deg, const fq_struct* alpha, const int len,
 		   const fq_ctx_t ctx, flint_rand_t state) {
     fq_poly_randtest_irreducible(res, state, deg+1, ctx);
     while (fq_poly_eval_zero(res, alpha, len, ctx)) {

@@ -27,6 +27,10 @@ void cm_gen_e(int* e, const int n, const int t, const int N, const int tau);
 
 
 // FINITE FIELDS
+void _fq_vec_2_int(int* res, const fq_struct* a, const int len, const fq_ctx_t ctx);
+
+void _int_vec_2_fq(fq_struct* res, const int* a, const int len, const fq_ctx_t ctx);
+
 int fq_check_repeat(const fq_struct* a, const int len, const fq_ctx_t ctx);
 
 void fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx, flint_rand_t state);
@@ -40,7 +44,7 @@ int fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len, 
 void fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta, const int len,
 			 const fq_ctx_t ctx);
 
-void cm_fq_poly_irr_pol(fq_poly_t res, const int deg, const fq_struct* alpha, const int len,
+void cm_fq_poly_irr_pol(fq_poly_t& res, const int deg, const fq_struct* alpha, const int len,
 			const fq_ctx_t ctx, flint_rand_t state);
 
 void xgcd_abort(fq_poly_t u, fq_poly_t v, fq_poly_t d, const fq_poly_t a, const fq_poly_t b,

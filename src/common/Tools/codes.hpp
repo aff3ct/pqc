@@ -37,4 +37,13 @@ Goppa_parity_check(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, cons
 void
 Goppa_parity_check_bin(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, const fq_ctx_t ctx);
 
+
+
+void
+CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len, 
+	    const fq_ctx_t& ctx_q);
+
 #endif // CODES_H
+
+
+

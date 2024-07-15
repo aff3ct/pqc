@@ -35,6 +35,12 @@ CM_public_key:: get_t() const {
     return this->t;
 }
 
+fq_ctx_t*
+CM_public_key:: get_ctx_q() const {
+    return this->ctx_q;
+}
+
+
 int
 CM_public_key::keygen(const CM_secret_key& sk, const fq_ctx_t& ctx) {
     fq_mat_t H, HH, T, I;
@@ -69,7 +75,7 @@ CM_public_key::keygen(const CM_secret_key& sk, const fq_ctx_t& ctx) {
     fq_mat_clear(H, ctx);
     fq_mat_clear(HH, *(this->ctx_q));
     fq_mat_window_clear(I, *(this->ctx_q));
-
+    
     
     
     return b;

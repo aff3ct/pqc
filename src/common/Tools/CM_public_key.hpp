@@ -21,7 +21,7 @@ public:
     int get_n() const;
     int get_m() const;
     int get_t() const;
-
+    fq_ctx_t* get_ctx_q() const;
 
     
     int keygen(const CM_secret_key& sk, const fq_ctx_t& ctx);

@@ -5,26 +5,26 @@
 
 namespace spu
 {
-namespace module
-{
+    namespace module
+    {
 
-class Comparator  : public Module {
+	class Comparator  : public Module {
 
-private:
+	private:
     
-    int frame_size;
+	    int frame_size;
 
-public:
+	public:
 
-    Comparator(int frame_size);
-    virtual ~Comparator();
+	    Comparator(int frame_size);
+	    virtual ~Comparator();
 
-protected:
+	protected:
 
-    virtual void compare(int* input1, int* input2, int *output, const int frame_id);
+	    virtual void compare(int* input1, int* input2, int *output, const int frame_id);
 
-};
-}
+	};
+    }
 }
 
 #endif // COMPARATOR_H

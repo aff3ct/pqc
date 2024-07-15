@@ -31,8 +31,7 @@ RandomFixedWeight::RandomFixedWeight(int frame_size, int weight, int N, int tau)
 RandomFixedWeight::~RandomFixedWeight() {
 }    
 
-void RandomFixedWeight::random_fixed_weight(int* input, int* output, 
-					    const int frame_id) {
+void RandomFixedWeight::random_fixed_weight(int* input, int* output, const int frame_id) { 
 
     // std::random_device rd;
     // std::mt19937 rand_gen(rd());

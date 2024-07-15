@@ -325,3 +325,35 @@ Goppa_parity_check_bin(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, 
 
     fq_poly_clear(g2, ctx);
 }
+
+
+/* **************************************************************************** */
+/*                                   ENCODERS                                   */
+/* **************************************************************************** */
+
+
+/* encoding as in CM
+   Compute the syndrome associated s = H * e associated to e
+*/
+void
+CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len, 
+	    const fq_ctx_t& ctx_q)  {
+  /* nb of rows and columns in T */
+  int n = fq_mat_nrows(T, ctx_q);
+  int m = fq_mat_ncols(T, ctx_q);
+
+  /* create parity check matrix H = [Id | T] */   
+  fq_mat_t I, H;
+  fq_mat_init(I, n, n, ctx_q);
+  fq_mat_one(I, ctx_q);
+  fq_mat_init(H, n, len, ctx_q);
+  fq_mat_concat_horizontal(H, I, T, ctx_q);
+
+  fq_mat_clear(I, ctx_q); /* clearing memory */
+
+  
+  /* computes H * e */
+  fq_mat_mul_vec(res, H, e, len, ctx_q);
+
+  fq_mat_clear(H, ctx_q); /* clearing memory */
+}
