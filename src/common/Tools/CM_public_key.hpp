@@ -9,18 +9,18 @@ class CM_public_key {
 private:
     int n;
     int m;
-    int t;
+    int d;
     fq_ctx_t* ctx_q;
 
 public:
     fq_mat_t T;
 
-    CM_public_key(int n, int m, int t, fq_ctx_t* ctx_q);
+    CM_public_key(int n, int m, int d, fq_ctx_t* ctx_q);
     ~CM_public_key();
 
     int get_n() const;
     int get_m() const;
-    int get_t() const;
+    int get_d() const;
     fq_ctx_t* get_ctx_q() const;
 
     

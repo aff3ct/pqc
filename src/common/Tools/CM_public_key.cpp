@@ -5,13 +5,13 @@
 #include <stdlib.h>
 using namespace std;
 
-CM_public_key::CM_public_key(int n, int m, int t, fq_ctx_t* ctx_q) {
+CM_public_key::CM_public_key(int n, int m, int d, fq_ctx_t* ctx_q) {
     this->n = n;
     this->m = m;
-    this->t = t;
+    this->d = d;
     this->ctx_q = ctx_q;
 
-    fq_mat_init(this->T, t * m, n - t * m, *ctx_q);
+    fq_mat_init(this->T, d * m, n - d * m, *ctx_q);
     fq_mat_zero(this->T, *ctx_q);
 }
 
@@ -31,8 +31,8 @@ CM_public_key:: get_m() const {
 }
 
 int
-CM_public_key:: get_t() const {
-    return this->t;
+CM_public_key:: get_d() const {
+    return this->d;
 }
 
 fq_ctx_t*
@@ -47,25 +47,25 @@ CM_public_key::keygen(const CM_secret_key& sk, const fq_ctx_t& ctx) {
 
     // fq_ctx_t* ctx = sk.get_ctx();    
     /* compute parity check matrix over F_qᵐ */
-    fq_mat_init(H, this->t, this->n, ctx);
+    fq_mat_init(H, this->d, this->n, ctx);
     Goppa_parity_check(H, sk.get_alpha(), sk.g, ctx);
     
     /* expand parity check matrix */
-    fq_mat_init(HH, (this->m)*(this->t), this->n, *(this->ctx_q));
+    fq_mat_init(HH, (this->m)*(this->d), this->n, *(this->ctx_q));
     fq_matrix_expand(HH, H, ctx, *(this->ctx_q));
     
     int r = fq_mat_rref(HH, HH, *(this->ctx_q));
     
-    fq_mat_window_init(I, HH, 0, 0, this->t * this->m,
-		       (this->t) * (this->m), *(this->ctx_q));
+    fq_mat_window_init(I, HH, 0, 0, this->d * this->m,
+		       (this->d) * (this->m), *(this->ctx_q));
     
     int b = fq_mat_is_one(I, *(this->ctx_q));
     
     /* printf("%d\n", b); */
     /* int ptt = fq_mat_print_pretty(T, ctx_q); */
     if (b) {
-	fq_mat_window_init(T, HH, 0, (this->t) * (this->m),
-			   (this->t) * (this->m), (this->n),
+	fq_mat_window_init(T, HH, 0, (this->d) * (this->m),
+			   (this->d) * (this->m), (this->n),
 			   *(this->ctx_q));
 	fq_mat_set(this->T, T, *(this->ctx_q));
 	fq_mat_window_clear(T, *(this->ctx_q));

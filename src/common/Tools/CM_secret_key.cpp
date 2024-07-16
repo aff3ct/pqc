@@ -38,13 +38,14 @@ CM_secret_key:: get_ctx() const {
 }
 
 void
-CM_secret_key:: keygen(const int t, flint_rand_t state) {
+CM_secret_key:: keygen(const int d, flint_rand_t state) {
     /* n random elements */
     fq_vec_rand_distinct_2(this->alpha, this->n, *(this->ctx), state);
-    
+    std::cout << "after computing alpha !" <<     std::endl;
     /* irr pol over Fq (="ctx") without any root in alpha */
-    cm_fq_poly_irr_pol(this->g, t, this->alpha, this->n, *(this->ctx),
+    cm_fq_poly_irr_pol(this->g, d, this->alpha, this->n, *(this->ctx),
 		       state);
+    std::cout << "after generating pol !" <<     std::endl;
 }
 
 

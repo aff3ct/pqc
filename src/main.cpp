@@ -26,6 +26,7 @@
 // #include "MySource.hpp"
 #include "Modules/Comparator/Comparator.hpp"
 #include "Modules/RandomFixedWeight/RandomFixedWeight.hpp"
+#include "Modules/CM_Encoder/CM_Encoder.hpp"
 
 // #include "SerialPort.hpp"
 
@@ -54,19 +55,116 @@ using namespace std;
 
 int main(int argc, char** argv, char** env) {
 
+
+
     fmpz_t p;
-    slong d;
+    slong m;
     fq_ctx_t ctx, ctx_q;
     
     fmpz_init_set_ui(p, 2);
-    d = 7;
-    fq_ctx_init_conway(ctx, p, d, "X");
+    m = 5;
+    fq_ctx_init_conway(ctx, p, m, "X");
     fq_ctx_init_conway(ctx_q, p, 1, "Y");
 
-    int deg = 15; 
-    slong len = 128;
+    int deg = 4; 
+    slong len = 32;
     int t = deg/2;
-    int tau = 20;
+    int tau = 30;
+
+
+    FLINT_TEST_INIT(state);
+
+    
+    // AFTER THAT :     TESTS WITH MODULES
+    
+    const int FRAME_SIZE = len;
+    const int DEG = deg;
+    const int WEIGHT = t;
+    const int TAU = tau;
+    const int N = 1 << m;
+    const int OUTPUT_SIZE = DEG * m;
+
+	
+    CM_secret_key SK = CM_secret_key(FRAME_SIZE, &ctx);
+    CM_public_key PK = CM_public_key(FRAME_SIZE, m, DEG, &ctx_q);
+    
+    CM_keygen_naive(SK, PK, FRAME_SIZE, DEG, ctx, state);
+
+    cout << "After keygen ! \n" << endl;
+
+    module::Initializer   <int> initializer(FRAME_SIZE);
+    module::Incrementer   <int> incr1(FRAME_SIZE);
+    module::Finalizer     <int> finalizer(OUTPUT_SIZE);
+    // module::Finalizer     <int> finalizer(FRAME_SIZE);
+
+    // // module::Finalizer     <int> finalizer_hw(FRAME_SIZE);
+    // module::MySource    my_source(FRAME_SIZE);
+
+    module::Comparator comp(FRAME_SIZE);
+    module::RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT, N, TAU);
+    module::CM_Encoder cm_encode(FRAME_SIZE, OUTPUT_SIZE, PK);
+
+    
+    // module::Comparator comp_fpga(FRAME_SIZE);
+    // VerilatorSimulation sim(FRAME_SIZE);
+    // // SerialPort serial("/dev/tty.usbserial-210292ABF7641", 115200, FRAME_SIZE);
+
+    
+
+    // initializer   ["initialize::out" ] = incr1           ["increment::in"];
+    // // my_source   ["generate::output" ] = sim             ["simulate::input"];
+    // // // my_source   ["generate::output" ] = serial          ["write::input"];
+
+    // // sim         ["simulate::output" ] = comp_sim            ["compare::input2"];
+    // // comp_sim    ["compare::output"  ] = finalizer_sw        ["finalize::in"];
+    
+    // comp ["compare::input1"] = incr1     ["increment::out"];
+    // comp ["compare::input2"] = incr1     ["increment::out"];
+
+    // randfixed["random_fixed_weight::input"] = comp["compare::output"];
+    
+    
+    // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
+    // comp ["compare::output"] = finalizer ["finalize::in"  ];
+
+    // cout << "done \n" <<endl;
+    
+    initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"];
+    randfixed   ["random_fixed_weight::output" ] = cm_encode   ["cm_encoder::input"];
+    cm_encode ["cm_encoder::output"] = finalizer ["finalize::in"  ];
+    // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
+
+
+    
+    // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"];
+    // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"];
+    // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"];
+
+    std::vector<runtime::Task*> first = {&initializer("initialize")};
+
+    runtime::Sequence seq(first);
+
+    std::ofstream file("graph.dot");
+    seq.export_dot(file);
+
+    for (auto lt : seq.get_tasks_per_types())
+        for (auto t : lt)
+	    {
+		t->set_stats(true);
+		t->set_debug(true);
+	    }
+
+    seq.exec_seq();
+    // seq.exec_seq();
+
+
+
+    
+    fq_ctx_clear(ctx);
+    fq_ctx_clear(ctx_q);
+
+
+
 
     // int a = _fq_vec_print(SK.get_alpha(), len, ctx); 
 
@@ -83,79 +181,5 @@ int main(int argc, char** argv, char** env) {
     
     // fq_poly_print_pretty(SK.g, "X",  ctx);
     // cout << " "  << endl;
-
-
-    FLINT_TEST_INIT(state);
-
-    CM_secret_key SK = CM_secret_key(len, &ctx);
-    CM_public_key PK = CM_public_key(len, d, t, &ctx_q);
-    
-    CM_keygen_naive(SK, PK, len, t, ctx, state);
-
-    cout << "After keygen ! \n" << endl;
-
-    fq_ctx_clear(ctx);
-    fq_ctx_clear(ctx_q);
-    
-    // AFTER THAT :     TESTS WITH MODULES
-    
-    const int FRAME_SIZE = 20;
-    const int WEIGHT = 10;
-    const int TAU = 20;
-    const int N = 25;
-
-    module::Initializer   <int> initializer(FRAME_SIZE);
-    module::Incrementer   <int> incr1(FRAME_SIZE);
-    module::Finalizer     <int> finalizer(FRAME_SIZE);
-
-    // // module::Finalizer     <int> finalizer_hw(FRAME_SIZE);
-    // module::MySource    my_source(FRAME_SIZE);
-
-    module::Comparator comp(FRAME_SIZE);
-    module::RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT, N, TAU);
-    /* module::CM_Encoder cm_encode(); */
-
-    
-    // module::Comparator comp_fpga(FRAME_SIZE);
-    // VerilatorSimulation sim(FRAME_SIZE);
-    // // SerialPort serial("/dev/tty.usbserial-210292ABF7641", 115200, FRAME_SIZE);
-
-    
-
-    initializer   ["initialize::out" ] = incr1           ["increment::in"];
-    // my_source   ["generate::output" ] = sim             ["simulate::input"];
-    // // my_source   ["generate::output" ] = serial          ["write::input"];
-
-    // sim         ["simulate::output" ] = comp_sim            ["compare::input2"];
-    // comp_sim    ["compare::output"  ] = finalizer_sw        ["finalize::in"];
-    
-    comp ["compare::input1"] = incr1     ["increment::out"];
-    comp ["compare::input2"] = incr1     ["increment::out"];
-
-    randfixed["random_fixed_weight::input"] = comp["compare::output"];
-    
-    
-    randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
-
-    // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"];
-    // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"];
-    // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"];
-
-    std::vector<runtime::Task*> first = {&initializer("initialize")};
-
-    runtime::Sequence seq(first);
-
-    std::ofstream file("graph.dot");
-    seq.export_dot(file);
-
-    for (auto lt : seq.get_tasks_per_types())
-        for (auto t : lt)
-        {
-            t->set_stats(true);
-            t->set_debug(true);
-        }
-
-    seq.exec_seq();
-    // seq.exec_seq();
 
 }

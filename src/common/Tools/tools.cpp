@@ -159,6 +159,7 @@ fq_check_repeat(const fq_struct* a, const int len, const fq_ctx_t ctx) {
 }
 
 
+
 /* generate a random vector whose coeffs are in a finite field and all distincts */
 void
 fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx, flint_rand_t state) {
@@ -223,7 +224,6 @@ fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  bet
     fq_t q; fq_init(q, ctx);
     fq_t a; fq_init(a, ctx);
 
-  
     for (int i = 0; i < len; ++i) {
 	fq_neg(a, &alpha[i], ctx);
 	fq_poly_set_coeff(tmp, 0, a, ctx);

@@ -20,8 +20,14 @@ public:
     int get_n() const;
     fq_struct* get_alpha() const;
     fq_ctx_t* get_ctx() const;
-    
-    void keygen(const int t, flint_rand_t state);
+
+
+  /* Parameters as in the Classic McEliece specification document
+     alpha and g are assumed to be initialised
+     Note that the parameter m as in the CM spec. is encapsulated within "ctx" here.
+     n is the length
+     d is the degree of the polynomial g defining the Goppa code */
+    void keygen(const int d, flint_rand_t state);
     // fq_poly_t& get_g() const;
 };
 

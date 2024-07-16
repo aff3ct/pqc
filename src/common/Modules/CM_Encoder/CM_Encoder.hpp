@@ -32,7 +32,7 @@ namespace spu
 	protected:
 
 	    virtual void cm_encoder(int* input, int* output, const CM_public_key& PK,
-				     const int frame_id);
+				    const int frame_id);
 
 	}; 
     }
