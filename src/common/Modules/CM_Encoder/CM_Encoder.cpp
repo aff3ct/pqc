@@ -23,7 +23,7 @@ CM_Encoder:: CM_Encoder(int frame_size, int out_size, CM_public_key& PK) :
 						const size_t frame_id) -> int {
 	static_cast<CM_Encoder&>(m).cm_encoder(static_cast<int*>(t[input].get_dataptr()),
 					       static_cast<int*>(t[output].get_dataptr()),
-					       static_cast<CM_public_key>(PK),
+					       static_cast<CM_public_key&>(PK),
 					       frame_id);
 	return 0;
     }			 	);
