@@ -38,10 +38,20 @@ void
 Goppa_parity_check_bin(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, const fq_ctx_t ctx);
 
 
-
+// ENCODER
 void
 CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len, 
 	    const fq_ctx_t& ctx_q);
+
+
+// DECODER
+int
+CM_syndrome_decoding(fq_struct* res, const fq_struct* s, const fq_struct* alpha, const fq_poly_t g,
+		     const int len, const int t, const fq_ctx_t ctx);
+
+int
+CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* alpha, const fq_poly_t g,
+			 const int len, const int t, const fq_ctx_t ctx);
 
 #endif // CODES_H
 

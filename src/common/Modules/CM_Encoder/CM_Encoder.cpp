@@ -46,26 +46,12 @@ CM_Encoder:: cm_encoder(int* input, int* output, const CM_public_key& PK, const 
     
     /* conversion int to F_2 */
     _int_vec_2_fq(tmp_e, input, this->frame_size, *ctx_q);
-    _fq_vec_print(tmp_e, this->frame_size, *ctx_q);
-    cout << "\n" << endl;
-    for (int i = 0; i < this->frame_size; i++) {
-	fq_print_pretty(&tmp_e[i], *ctx_q);
-	std::cout << " " << std::endl;
-    }
 
-    std::cerr << "before encoding ! \n" << std::endl;
     /* encoding */
-    cout << "out size is :    " << this->out_size << "\n" << endl;
     CM_encoding(tmp_s, tmp_e, PK.T, this->frame_size, *ctx_q);
 
-    std::cerr << "after encoding ! \n" << std::endl;
-
-
-    
     /* reverse conversion F_2 to int */
     _fq_vec_2_int(output, tmp_s, this->out_size, *ctx_q);
-    std::cerr << "after final conversion ! \n" << std::endl;
-
     
     /* clear memory */
     _fq_vec_clear(tmp_e, this->frame_size, *ctx_q);

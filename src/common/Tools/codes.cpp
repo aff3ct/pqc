@@ -65,7 +65,7 @@
 */
 int
 RS_decoder(fq_poly_t res, const fq_struct* c, const fq_struct* alpha, const int n, const int k,
-	   const fq_ctx_t ctx, const fq_ctx_t ctx_q) {
+	   const fq_ctx_t ctx) {
 
     /* declaration and init of local variables */
     fq_poly_t A, P, tmp, u, v, D;
@@ -106,8 +106,7 @@ RS_decoder(fq_poly_t res, const fq_struct* c, const fq_struct* alpha, const int 
 /* Decoding algorithm for Generalised Reed-Solomon codes */
 int
 GRS_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq_struct* beta,
-	    const int n, const int k, const fq_ctx_t ctx,
-	    const fq_ctx_t ctx_q) {
+	    const int n, const int k, const fq_ctx_t ctx) {
     /* declaration and init of local variables */
     fq_t tmp; fq_init(tmp, ctx);
     fq_struct* c1 = _fq_vec_init(n, ctx);
@@ -120,7 +119,7 @@ GRS_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq
     }
 
     /* use the RS decoder */
-    int b = RS_decoder(p, c1, alpha, n, k, ctx, ctx_q);
+    int b = RS_decoder(p, c1, alpha, n, k, ctx);
 
     if (b) {
 	for(int ii =0; ii < n; ii++) {
@@ -141,7 +140,7 @@ GRS_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq
 /* Decoding algorithm for Goppa codes */
 int
 Goppa_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq_poly_t g,
-	      const int n, const int k, const fq_ctx_t ctx, const fq_ctx_t ctx_q) {
+	      const int n, const int k, const fq_ctx_t ctx) {
 
     /* declaration and init of local variables */
     fq_poly_t A, tmp_poly, Aprime;
@@ -165,7 +164,7 @@ Goppa_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const 
 	fq_div(&beta[i], &beta[i], tmp, ctx);
     }
 
-    int b = GRS_decoder(res, c, alpha, beta, n, k, ctx, ctx_q);
+    int b = GRS_decoder(res, c, alpha, beta, n, k, ctx);
 
     /* clearing memory */
     fq_poly_clear(A, ctx);
@@ -181,7 +180,7 @@ Goppa_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const 
 /* Decoding algorithm for *BINARY* Goppa codes */
 int
 Goppa_decoder_bin(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq_poly_t g,
-		  const int n, const int k, const fq_ctx_t ctx, const fq_ctx_t ctx_q) {
+		  const int n, const int k, const fq_ctx_t ctx) {
 
     /* declaration and init of local variables */
     fq_poly_t A, tmp_poly, Aprime;
@@ -205,7 +204,7 @@ Goppa_decoder_bin(fq_struct* res, const fq_struct* c, const fq_struct* alpha, co
 	fq_poly_evaluate_fq(tmp, Aprime, &alpha[i], ctx);
 	fq_div(&beta[i], &beta[i], tmp, ctx);
     }
-    int b = GRS_decoder(res, c, alpha, beta, n, k, ctx, ctx_q);
+    int b = GRS_decoder(res, c, alpha, beta, n, k, ctx);
     return b;
 }
 
@@ -348,16 +347,67 @@ CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len
     fq_mat_one(I, ctx_q);
     fq_mat_init(H, n, len, ctx_q);
     fq_mat_concat_horizontal(H, I, T, ctx_q);
-    std::cerr << "after concat ! \n" << std::endl;
 
     fq_mat_clear(I, ctx_q); /* clearing memory */
 
     /* computes H * e */
     int nH = fq_mat_nrows(H, ctx_q);
     int mH = fq_mat_ncols(H, ctx_q);
-    std::cerr << "n and m are:  " << nH <<  mH << "\n " << std::endl;
+
     fq_mat_mul_vec(res, H, e, len, ctx_q);
-    std::cerr << "after mult ! \n" << std::endl;
     
     fq_mat_clear(H, ctx_q); /* clearing memory */
+}
+
+
+/* **************************************************************************** */
+/*                                   DECODERS                                   */
+/* **************************************************************************** */
+
+
+
+/* decode syndrome as in CM */
+int
+CM_syndrome_decoding(fq_struct* res, const fq_struct* s, const fq_struct* alpha, const fq_poly_t g,
+		     const int len, const int t, const fq_ctx_t ctx) {
+    int d = fq_poly_degree(g, ctx);
+    int m = fq_ctx_degree(ctx);
+    /* first needs to expand syndrome s */
+    fq_struct* ss = _fq_vec_init(len, ctx);
+    _fq_vec_zero(ss, len, ctx);
+    for (int i = 0; i < d * m; i++) {
+	if (!fq_is_zero(&s[i], ctx)) fq_set_ui(&ss[i], 1, ctx);
+    }
+  
+    /* then we use the Goppa decoder */
+    int b = Goppa_decoder(res, ss, alpha, g, len, len-2*t, ctx);
+
+    /* clearing memory */
+    _fq_vec_clear(ss, len, ctx);
+  
+    return b;
+}
+
+
+/* decode syndrome as in CM */
+int
+CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* alpha, const fq_poly_t g,
+			 const int len, const int t, const fq_ctx_t ctx) {
+    int d = fq_poly_degree(g, ctx);
+    int m = fq_ctx_degree(ctx);
+
+    /* first needs to expand syndrome s */
+    fq_struct* ss = _fq_vec_init(len, ctx);
+    _fq_vec_zero(ss, len, ctx);
+    for (int i = 0; i < d * m; i++) {
+	if (!fq_is_zero(&s[i], ctx)) fq_set_ui(&ss[i], 1, ctx);
+    }
+ 
+    /* then we use the Goppa decoder */
+    int b = Goppa_decoder_bin(res, ss, alpha, g, len, len-2*t, ctx);
+
+    /* clearing memory */
+    _fq_vec_clear(ss, len, ctx);
+  
+    return b;
 }

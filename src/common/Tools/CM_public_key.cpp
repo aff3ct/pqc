@@ -75,9 +75,7 @@ CM_public_key::keygen(const CM_secret_key& sk, const fq_ctx_t& ctx) {
     fq_mat_clear(H, ctx);
     fq_mat_clear(HH, *(this->ctx_q));
     fq_mat_window_clear(I, *(this->ctx_q));
-    
-    
-    
+        
     return b;
 }
 

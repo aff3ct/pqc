@@ -16,7 +16,6 @@ CM_secret_key::CM_secret_key(int m, fq_ctx_t* ctx) {
 }
 
 CM_secret_key::~CM_secret_key() {
-    std::cerr << "In SK destructor! \n" << std::endl;
     _fq_vec_clear(this->alpha, this->n, *(this->ctx));
     fq_poly_clear((this->g), *(this->ctx));
 }
@@ -41,11 +40,10 @@ void
 CM_secret_key:: keygen(const int d, flint_rand_t state) {
     /* n random elements */
     fq_vec_rand_distinct_2(this->alpha, this->n, *(this->ctx), state);
-    std::cout << "after computing alpha !" <<     std::endl;
+    
     /* irr pol over Fq (="ctx") without any root in alpha */
     cm_fq_poly_irr_pol(this->g, d, this->alpha, this->n, *(this->ctx),
 		       state);
-    std::cout << "after generating pol !" <<     std::endl;
 }
 
 
