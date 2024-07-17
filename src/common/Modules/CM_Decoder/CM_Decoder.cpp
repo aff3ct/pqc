@@ -26,8 +26,8 @@ CM_Decoder:: CM_Decoder(int frame_size, int synd_size, int wieight, CM_secret_ke
 					       static_cast<CM_secret_key&>(SK),
 					       frame_id);
 	return 0;
-    }			 	);
-
+    }
+	);
 }
 
 
