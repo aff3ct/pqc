@@ -54,6 +54,19 @@ CM_Decoder:: cm_decoder(int* input, int* output, const CM_secret_key& SK, const 
     
     // CM_encoding(tmp_s, tmp_e, PK.T, this->frame_size, *ctx_q);
 
+    for(auto i = 0; i < this->synd_size; i++)
+	{
+	    // if (i < synd_size) {
+	    fq_add(&tmp_e[i], &tmp_e[i], &tmp_s[i], *ctx);
+	    // if(input1[i] == (input2[i] + input3[i]) % 2  ) output[i] = 1;
+	    // else output[i] = 0;            
+	    // } else {	    
+	    // if(input1[i] == input2[i]) output[i] = 1;
+	    // else output[i] = 0;            
+	}
+	
+
+    
     /* reverse conversion F_2 to int */
     _fq_vec_2_int(output, tmp_e, this->frame_size, *ctx);
     

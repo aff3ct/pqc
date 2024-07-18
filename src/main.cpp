@@ -65,8 +65,8 @@ int main(int argc, char** argv, char** env) {
     
     fmpz_init_set_ui(p, 2);
     m = 7;
-    fq_ctx_init_conway(ctx, p, m, "X");
-    fq_ctx_init_conway(ctx_q, p, 1, "Y");
+    fq_ctx_init_conway(ctx, p, m, "x");
+    fq_ctx_init_conway(ctx_q, p, 1, "α");
 
     int deg = 15; 
     slong len = 128;
@@ -101,13 +101,13 @@ int main(int argc, char** argv, char** env) {
     // // module::Finalizer     <int> finalizer_hw(FRAME_SIZE);
     // module::MySource    my_source(FRAME_SIZE);
 
-    // module::Comparator comp(FRAME_SIZE);
+    module::Comparator comp(FRAME_SIZE);
     module::RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT, N, TAU);
     module::CM_Encoder cm_encode(FRAME_SIZE, OUTPUT_SIZE, PK);
     module::CM_Decoder cm_decode(FRAME_SIZE, OUTPUT_SIZE, WEIGHT, SK);
 
 
-    module::SyndComparator comp(FRAME_SIZE, OUTPUT_SIZE);
+    // module::SyndComparator comp(FRAME_SIZE, OUTPUT_SIZE);
     
     // module::Comparator comp_fpga(FRAME_SIZE);
     // VerilatorSimulation sim(FRAME_SIZE);
@@ -136,14 +136,16 @@ int main(int argc, char** argv, char** env) {
     initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"];
     randfixed   ["random_fixed_weight::output" ] = cm_encode   ["cm_encoder::input"];
     cm_encode ["cm_encoder::output"] = cm_decode ["cm_decoder::input"];
-    // cm_decode ["cm_decoder::output"] = finalizer ["finalize::in"  ];
+    cm_decode ["cm_decoder::output"] = comp ["compare::input1"];
+    randfixed   ["random_fixed_weight::output" ]= comp ["compare::input2"];
+    comp ["compare::output"] = finalizer ["finalize::in"  ];
 
 
-    randfixed   ["random_fixed_weight::output" ] = comp ["compare::input1" ];
-    cm_decode ["cm_decoder::output"] = comp ["compare::input2" ];
-    cm_encode ["cm_encoder::output"] = comp ["compare::input3" ];
+    // randfixed   ["random_fixed_weight::output" ] = comp ["compare::input1" ];
+    // cm_decode ["cm_decoder::output"] = comp ["compare::input2" ];
+    // cm_encode ["cm_encoder::output"] = comp ["compare::input3" ];
 
-    comp ["compare::output"] = finalizer ["finalize::in"];
+    // comp ["compare::output"] = finalizer ["finalize::in"];
     
     // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
 

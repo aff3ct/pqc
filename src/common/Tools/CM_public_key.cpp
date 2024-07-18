@@ -61,7 +61,6 @@ CM_public_key::keygen(const CM_secret_key& sk, const fq_ctx_t& ctx) {
     
     int b = fq_mat_is_one(I, *(this->ctx_q));
     
-    printf("%d\n", b);
     /* int ptt = fq_mat_print_pretty(T, ctx_q); */
     if (b != 0) {
 	fq_mat_window_init(T, HH, 0, (this->d) * (this->m), (this->d) * (this->m), (this->n),

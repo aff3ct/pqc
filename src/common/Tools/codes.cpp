@@ -120,7 +120,6 @@ GRS_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq
 
     /* use the RS decoder */
     int b = RS_decoder(p, c1, alpha, n, k, ctx);
-    printf ("what is output RS-decod ?  %d \n", b);
     if (b != 0) {
 	for(int ii =0; ii < n; ii++) {
 	    fq_poly_evaluate_fq(&res[ii], p, &alpha[ii], ctx);
@@ -379,8 +378,6 @@ CM_syndrome_decoding(fq_struct* res, const fq_struct* s, const fq_struct* alpha,
 
     /* then we use the Goppa decoder */
     int b = Goppa_decoder(res, ss, alpha, g, len, len-2*t,  ctx);
-    printf("decoding done ? %d \n", b);
-
 
     /* clearing memory */
     _fq_vec_clear(ss, len, ctx);
