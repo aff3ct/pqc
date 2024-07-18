@@ -53,6 +53,3 @@ CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* al
 			 const int len, const int t, const fq_ctx_t ctx);
 
 #endif // CODES_H
-
-
-

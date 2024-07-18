@@ -281,15 +281,16 @@ xgcd_abort(fq_poly_t u, fq_poly_t v, fq_poly_t d, const fq_poly_t a, const fq_po
 
     /* set the values */
     fq_poly_zero(u1, ctx);
-    fq_poly_zero(v0, ctx);
+    fq_poly_zero(v0, ctx); 
     fq_poly_one(u0, ctx);
     fq_poly_one(v1, ctx);
     fq_poly_set(d0, a, ctx);
     fq_poly_set(d1, b, ctx);
-
+    
     /* start the loop */
-    while (fq_poly_degree(d0, ctx) > k) {
+    while (fq_poly_degree(d0, ctx) > k && !fq_poly_is_zero(d1, ctx)) {
 	fq_poly_divrem(q, r, d0, d1, ctx); /* quotient */
+
 	fq_poly_set(d0, d1, ctx);
 	fq_poly_set(d1, r, ctx);
     

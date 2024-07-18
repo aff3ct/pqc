@@ -70,7 +70,7 @@ int main(int argc, char** argv, char** env) {
 
     int deg = 15; 
     slong len = 128;
-    int t = deg / 3;
+    int t = deg;
     int tau = 20;
 
 
