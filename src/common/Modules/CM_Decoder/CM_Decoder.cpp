@@ -5,7 +5,7 @@ using namespace spu;
 using namespace spu::module;
 using namespace std;
 
-CM_Decoder:: CM_Decoder(int frame_size, int synd_size, int wieight, CM_secret_key& SK) :
+CM_Decoder:: CM_Decoder(int frame_size, int synd_size, int weight, CM_secret_key& SK) :
     Module(),
     frame_size(frame_size),
     synd_size(synd_size),
@@ -47,9 +47,10 @@ CM_Decoder:: cm_decoder(int* input, int* output, const CM_secret_key& SK, const 
     /* conversion int to F_2 */
     _int_vec_2_fq(tmp_s, input, this->synd_size, *ctx);
 
+    
     /* decoding */
-    CM_syndrome_decoding(tmp_e, tmp_s, SK.get_alpha(), SK.g, this->frame_size, this->weight,
-			 *ctx);
+    int b = CM_syndrome_decoding(tmp_e, tmp_s, SK.get_alpha(), SK.g, this->frame_size, this->weight,
+				 *ctx);
     
     // CM_encoding(tmp_s, tmp_e, PK.T, this->frame_size, *ctx_q);
 

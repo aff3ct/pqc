@@ -68,10 +68,10 @@ int main(int argc, char** argv, char** env) {
     fq_ctx_init_conway(ctx, p, m, "X");
     fq_ctx_init_conway(ctx_q, p, 1, "Y");
 
-    int deg = 8; 
+    int deg = 15; 
     slong len = 128;
-    int t = deg;
-    int tau = 30;
+    int t = deg / 3;
+    int tau = 20;
 
 
     FLINT_TEST_INIT(state);
@@ -89,9 +89,10 @@ int main(int argc, char** argv, char** env) {
 	
     CM_secret_key SK = CM_secret_key(FRAME_SIZE, &ctx);
     CM_public_key PK = CM_public_key(FRAME_SIZE, m, DEG, &ctx_q);
+
     
     CM_keygen_naive(SK, PK, FRAME_SIZE, DEG, ctx, state);
-
+    
     module::Initializer   <int> initializer(FRAME_SIZE);
     module::Incrementer   <int> incr1(FRAME_SIZE);
     module::Finalizer     <int> finalizer(FRAME_SIZE);

@@ -89,7 +89,7 @@ RS_decoder(fq_poly_t res, const fq_struct* c, const fq_struct* alpha, const int 
     xgcd_abort(u, v, D, A, P, d, ctx);
     int b = fq_poly_divides(res, D, v, ctx);
     b = b && (fq_poly_degree(res, ctx) <= k);
-
+    
     /* clear memory */
     fq_clear(a, ctx);
     fq_poly_clear(A, ctx);
@@ -120,14 +120,14 @@ GRS_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq
 
     /* use the RS decoder */
     int b = RS_decoder(p, c1, alpha, n, k, ctx);
-
-    if (b) {
+    printf ("what is output RS-decod ?  %d \n", b);
+    if (b != 0) {
 	for(int ii =0; ii < n; ii++) {
 	    fq_poly_evaluate_fq(&res[ii], p, &alpha[ii], ctx);
 	    fq_mul(&res[ii], &res[ii], &beta[ii], ctx);
 	}
     }
-
+    
     /* clear memory */
     fq_clear(tmp, ctx);
     fq_poly_clear(p, ctx);
@@ -351,9 +351,6 @@ CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len
     fq_mat_clear(I, ctx_q); /* clearing memory */
 
     /* computes H * e */
-    int nH = fq_mat_nrows(H, ctx_q);
-    int mH = fq_mat_ncols(H, ctx_q);
-
     fq_mat_mul_vec(res, H, e, len, ctx_q);
     
     fq_mat_clear(H, ctx_q); /* clearing memory */
@@ -372,15 +369,18 @@ CM_syndrome_decoding(fq_struct* res, const fq_struct* s, const fq_struct* alpha,
 		     const int len, const int t, const fq_ctx_t ctx) {
     int d = fq_poly_degree(g, ctx);
     int m = fq_ctx_degree(ctx);
+
     /* first needs to expand syndrome s */
     fq_struct* ss = _fq_vec_init(len, ctx);
     _fq_vec_zero(ss, len, ctx);
     for (int i = 0; i < d * m; i++) {
 	if (!fq_is_zero(&s[i], ctx)) fq_set_ui(&ss[i], 1, ctx);
     }
-  
+
     /* then we use the Goppa decoder */
-    int b = Goppa_decoder(res, ss, alpha, g, len, len-2*t, ctx);
+    int b = Goppa_decoder(res, ss, alpha, g, len, len-2*t,  ctx);
+    printf("decoding done ? %d \n", b);
+
 
     /* clearing memory */
     _fq_vec_clear(ss, len, ctx);
