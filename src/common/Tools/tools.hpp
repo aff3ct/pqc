@@ -12,11 +12,13 @@
 #include <flint/fq_mat.h>	/* matrix / finite fields */
 #include <flint/perm.h>	/* permutations */
 
-
+/* ERROR GENERATION */
+// Bike
 void fisher_yates(int* perm, const int n);
 
+void bike_gen_e(int* e, const int len, const int t);
 
-// ERROR GENERATION
+// Classic McEliece
 slong* random_indices(const slong len, flint_rand_t state);
 
 int int_check_repeat(const int* a, const int len);
@@ -26,7 +28,7 @@ int cm_random_indices(int* res, const int n, const int t, const int N, const int
 void cm_gen_e(int* e, const int n, const int t, const int N, const int tau);
 
 
-// FINITE FIELDS
+/* FINITE FIELDS */
 void _fq_vec_2_int(int* res, const fq_struct* a, const int len, const fq_ctx_t ctx);
 
 void _int_vec_2_fq(fq_struct* res, const int* a, const int len, const fq_ctx_t ctx);
@@ -38,7 +40,7 @@ void fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx, fli
 void fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx, flint_rand_t state);
 
 
-// POLYNOMIALS
+/* POLYNOMIALS */
 int fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len, const fq_ctx_t ctx);
 
 void fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta, const int len,
@@ -53,7 +55,7 @@ void xgcd_abort(fq_poly_t u, fq_poly_t v, fq_poly_t d, const fq_poly_t a, const 
 
 
 
-// MATRICES
+ /* MATRICES */
 void fq_matrix_expand(fq_mat_t res, const fq_mat_t H, const fq_ctx_t ctx,
 		      const fq_ctx_t ctx_q);
 

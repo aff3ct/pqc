@@ -26,7 +26,8 @@
 // #include "MySource.hpp"
 #include "Modules/Comparator/Comparator.hpp"
 #include "Modules/SyndComparator/SyndComparator.hpp"
-#include "Modules/RandomFixedWeight/RandomFixedWeight.hpp"
+#include "Modules/CM_RandomFixedWeight/CM_RandomFixedWeight.hpp"
+#include "Modules/Bike_RandomFixedWeight/Bike_RandomFixedWeight.hpp"
 #include "Modules/CM_Encoder/CM_Encoder.hpp"
 #include "Modules/CM_Decoder/CM_Decoder.hpp"
 
@@ -102,7 +103,8 @@ int main(int argc, char** argv, char** env) {
     // module::MySource    my_source(FRAME_SIZE);
 
     module::Comparator comp(FRAME_SIZE);
-    module::RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT, N, TAU);
+    // module::CM_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT, N, TAU);
+    module::Bike_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT);
     module::CM_Encoder cm_encode(FRAME_SIZE, OUTPUT_SIZE, PK);
     module::CM_Decoder cm_decode(FRAME_SIZE, OUTPUT_SIZE, WEIGHT, SK);
 

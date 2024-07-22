@@ -21,7 +21,7 @@
 using namespace std;
 
 
-
+/* naive fisher-yates algorithm */
 void
 fisher_yates(int* perm, const int n) {
     int j;
@@ -41,6 +41,20 @@ fisher_yates(int* perm, const int n) {
 }
 
 
+/* Generates fixed weight vector as in Bike, i.e. using Fisher-Yates */
+void
+bike_gen_e(int* e, const int len, const int t) {
+    int perm[len];
+    for (int i = 0; i < len; ++i) {
+	perm[i] = 0;
+    }
+    fisher_yates(perm, len);
+    for (int i = 0 ; i < t; ++i) {
+	e[perm[i]] = 1;
+    }
+}
+
+
 
 
 slong*
@@ -49,6 +63,7 @@ random_indices(const slong len, flint_rand_t state) {
     _perm_randtest(perm, len, state);
     return(perm);
 }
+
 
 /* check repetitions in a naive way */
 int
