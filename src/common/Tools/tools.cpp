@@ -207,6 +207,15 @@ fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx, flint_
 /*                           POLYNOMIAL MANIPUTATION                            */
 /* **************************************************************************** */
 
+/* set the coeffs of polynomial */
+void
+fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len, const fq_ctx_t ctx) {
+    for (int i = 0; i < len; i++) {
+	fq_poly_set_coeff(f, i, &alpha[i], ctx);
+    }
+}
+
+
 /* check if f has a root in alpha */
 int
 fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len,

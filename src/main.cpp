@@ -35,11 +35,15 @@
 
 #include "Tools/tools.hpp"
 #include "Tools/codes.hpp"
+
+
 #include "Tools/CM_secret_key.hpp"
 #include "Tools/CM_public_key.hpp"
-
 #include "Tools/CM_keygen.hpp"
 
+
+#include "Tools/Bike_secret_key.hpp"
+#include "Tools/Bike_public_key.hpp"
 
 using namespace spu;
 using namespace spu::module;
@@ -69,134 +73,180 @@ int main(int argc, char** argv, char** env) {
     fq_ctx_init_conway(ctx, p, m, "x");
     fq_ctx_init_conway(ctx_q, p, 1, "α");
 
-    int deg = 15; 
-    slong len = 128;
-    int t = deg;
-    int tau = 20;
-
-
     FLINT_TEST_INIT(state);
 
+    /* ************************************************************************* */
+    /*                                TESTS FOR BIKE                             */
+    /* ************************************************************************* */
+
+    /* !! needs r such that 2 is primitive mod r !!  */
     
-    // AFTER THAT :     TESTS WITH MODULES
+    int r = 101;
+    int len = 2*r;
+    int weight = 10;
+
+
+
     
-    const int FRAME_SIZE = len;
-    const int DEG = deg;
-    const int WEIGHT = t;
-    const int TAU = tau;
-    const int N = 1 << m;
-    const int OUTPUT_SIZE = DEG * m;
+    Bike_secret_key SK = Bike_secret_key(r, &ctx_q);
+    Bike_public_key PK = Bike_public_key(r, &ctx_q);
+    int b;
+
+    for (int j = 0 ; j < 100; ++j) {
+      
+      SK.keygen(weight);
+
+      /* fq_poly_print_pretty(SK.h0, "t", ctx_q); */
+      /* printf("\n"); */
+      /* fq_poly_print_pretty(SK.h1, "t", ctx_q); */
+      /* printf("\n"); */
+
+
+      b = PK.keygen(SK);
+
+      if (b == 1)
+	printf("Keygen succeeded ! \n");
+    }
+    
+    
+    /* ************************************************************************* */       
+    /* ************************************************************************* */
+
+
+    
+    
+    
+    /* ************************************************************************* */
+    /*                           TESTS FOR CLASSIC MCELIECE                      */
+    /* ************************************************************************* */
+    /* int deg = 15;  */
+    /* slong len = 128; */
+    /* int t = deg; */
+    /* int tau = 20; */
+    
+    /* // AFTER THAT :     TESTS WITH MODULES */
+    
+    /* const int FRAME_SIZE = len; */
+    /* const int DEG = deg; */
+    /* const int WEIGHT = t; */
+    /* const int TAU = tau; */
+    /* const int N = 1 << m; */
+    /* const int OUTPUT_SIZE = DEG * m; */
 
 	
-    CM_secret_key SK = CM_secret_key(FRAME_SIZE, &ctx);
-    CM_public_key PK = CM_public_key(FRAME_SIZE, m, DEG, &ctx_q);
+    /* CM_secret_key SK = CM_secret_key(FRAME_SIZE, &ctx); */
+    /* CM_public_key PK = CM_public_key(FRAME_SIZE, m, DEG, &ctx_q); */
 
     
-    CM_keygen_naive(SK, PK, FRAME_SIZE, DEG, ctx, state);
+    /* CM_keygen_naive(SK, PK, FRAME_SIZE, DEG, ctx, state); */
     
-    module::Initializer   <int> initializer(FRAME_SIZE);
-    module::Incrementer   <int> incr1(FRAME_SIZE);
-    module::Finalizer     <int> finalizer(FRAME_SIZE);
-    // module::Finalizer     <int> finalizer(FRAME_SIZE);
+    /* module::Initializer   <int> initializer(FRAME_SIZE); */
+    /* module::Incrementer   <int> incr1(FRAME_SIZE); */
+    /* module::Finalizer     <int> finalizer(FRAME_SIZE); */
+    /* // module::Finalizer     <int> finalizer(FRAME_SIZE); */
 
-    // // module::Finalizer     <int> finalizer_hw(FRAME_SIZE);
-    // module::MySource    my_source(FRAME_SIZE);
+    /* // // module::Finalizer     <int> finalizer_hw(FRAME_SIZE); */
+    /* // module::MySource    my_source(FRAME_SIZE); */
 
-    module::Comparator comp(FRAME_SIZE);
-    // module::CM_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT, N, TAU);
-    module::Bike_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT);
-    module::CM_Encoder cm_encode(FRAME_SIZE, OUTPUT_SIZE, PK);
-    module::CM_Decoder cm_decode(FRAME_SIZE, OUTPUT_SIZE, WEIGHT, SK);
+    /* module::Comparator comp(FRAME_SIZE); */
+    /* // module::CM_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT, N, TAU); */
+    /* module::Bike_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT); */
+    /* module::CM_Encoder cm_encode(FRAME_SIZE, OUTPUT_SIZE, PK); */
+    /* module::CM_Decoder cm_decode(FRAME_SIZE, OUTPUT_SIZE, WEIGHT, SK); */
 
 
-    // module::SyndComparator comp(FRAME_SIZE, OUTPUT_SIZE);
+    /* // module::SyndComparator comp(FRAME_SIZE, OUTPUT_SIZE); */
     
-    // module::Comparator comp_fpga(FRAME_SIZE);
-    // VerilatorSimulation sim(FRAME_SIZE);
-    // // SerialPort serial("/dev/tty.usbserial-210292ABF7641", 115200, FRAME_SIZE);
-
-    
-
-    // initializer   ["initialize::out" ] = incr1           ["increment::in"];
-    // // my_source   ["generate::output" ] = sim             ["simulate::input"];
-    // // // my_source   ["generate::output" ] = serial          ["write::input"];
-
-    // // sim         ["simulate::output" ] = comp_sim            ["compare::input2"];
-    // // comp_sim    ["compare::output"  ] = finalizer_sw        ["finalize::in"];
-    
-    // comp ["compare::input1"] = incr1     ["increment::out"];
-    // comp ["compare::input2"] = incr1     ["increment::out"];
-
-    // randfixed["random_fixed_weight::input"] = comp["compare::output"];
-    
-    
-    // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
-    // comp ["compare::output"] = finalizer ["finalize::in"  ];
-
-    // cout << "done \n" <<endl;
-    
-    initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"];
-    randfixed   ["random_fixed_weight::output" ] = cm_encode   ["cm_encoder::input"];
-    cm_encode ["cm_encoder::output"] = cm_decode ["cm_decoder::input"];
-    cm_decode ["cm_decoder::output"] = comp ["compare::input1"];
-    randfixed   ["random_fixed_weight::output" ]= comp ["compare::input2"];
-    comp ["compare::output"] = finalizer ["finalize::in"  ];
-
-
-    // randfixed   ["random_fixed_weight::output" ] = comp ["compare::input1" ];
-    // cm_decode ["cm_decoder::output"] = comp ["compare::input2" ];
-    // cm_encode ["cm_encoder::output"] = comp ["compare::input3" ];
-
-    // comp ["compare::output"] = finalizer ["finalize::in"];
-    
-    // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
-
+    /* // module::Comparator comp_fpga(FRAME_SIZE); */
+    /* // VerilatorSimulation sim(FRAME_SIZE); */
+    /* // // SerialPort serial("/dev/tty.usbserial-210292ABF7641", 115200, FRAME_SIZE); */
 
     
-    // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"];
-    // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"];
-    // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"];
 
-    std::vector<runtime::Task*> first = {&initializer("initialize")};
+    /* // initializer   ["initialize::out" ] = incr1           ["increment::in"]; */
+    /* // // my_source   ["generate::output" ] = sim             ["simulate::input"]; */
+    /* // // // my_source   ["generate::output" ] = serial          ["write::input"]; */
 
-    runtime::Sequence seq(first);
+    /* // // sim         ["simulate::output" ] = comp_sim            ["compare::input2"]; */
+    /* // // comp_sim    ["compare::output"  ] = finalizer_sw        ["finalize::in"]; */
+    
+    /* // comp ["compare::input1"] = incr1     ["increment::out"]; */
+    /* // comp ["compare::input2"] = incr1     ["increment::out"]; */
 
-    std::ofstream file("graph.dot");
-    seq.export_dot(file);
+    /* // randfixed["random_fixed_weight::input"] = comp["compare::output"]; */
+    
+    
+    /* // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ]; */
+    /* // comp ["compare::output"] = finalizer ["finalize::in"  ]; */
 
-    for (auto lt : seq.get_tasks_per_types())
-        for (auto t : lt)
-	    {
-		t->set_stats(true);
-		t->set_debug(true);
-	    }
+    /* // cout << "done \n" <<endl; */
+    
+    /* initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"]; */
+    /* randfixed   ["random_fixed_weight::output" ] = cm_encode   ["cm_encoder::input"]; */
+    /* cm_encode ["cm_encoder::output"] = cm_decode ["cm_decoder::input"]; */
+    /* cm_decode ["cm_decoder::output"] = comp ["compare::input1"]; */
+    /* randfixed   ["random_fixed_weight::output" ]= comp ["compare::input2"]; */
+    /* comp ["compare::output"] = finalizer ["finalize::in"  ]; */
 
-    seq.exec_seq();
-    // seq.exec_seq();
 
+    /* // randfixed   ["random_fixed_weight::output" ] = comp ["compare::input1" ]; */
+    /* // cm_decode ["cm_decoder::output"] = comp ["compare::input2" ]; */
+    /* // cm_encode ["cm_encoder::output"] = comp ["compare::input3" ]; */
+
+    /* // comp ["compare::output"] = finalizer ["finalize::in"]; */
+    
+    /* // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ]; */
 
 
     
-    fq_ctx_clear(ctx);
-    fq_ctx_clear(ctx_q);
+    /* // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"]; */
+    /* // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"]; */
+    /* // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"]; */
+
+    /* std::vector<runtime::Task*> first = {&initializer("initialize")}; */
+
+    /* runtime::Sequence seq(first); */
+
+    /* std::ofstream file("graph.dot"); */
+    /* seq.export_dot(file); */
+
+    /* for (auto lt : seq.get_tasks_per_types()) */
+    /*     for (auto t : lt) */
+    /* 	    { */
+    /* 		t->set_stats(true); */
+    /* 		t->set_debug(true); */
+    /* 	    } */
+
+    /* seq.exec_seq(); */
+    /* // seq.exec_seq(); */
 
 
 
-
-    // int a = _fq_vec_print(SK.get_alpha(), len, ctx); 
-
-    // cout << " "  << endl;
-
-    // fq_poly_t& h  = SK.g;
-    // // h = SK.get_g();
-    // fq_poly_print_pretty(h, "X",  ctx);
-    // cout << " "  << endl;
-
-    // fq_poly_one(h, ctx);
-    // fq_poly_print_pretty(h, "X",  ctx);
-    // cout << " "  << endl;
     
-    // fq_poly_print_pretty(SK.g, "X",  ctx);
-    // cout << " "  << endl;
+    /* fq_ctx_clear(ctx); */
+    /* fq_ctx_clear(ctx_q); */
 
+
+
+
+    /* int a = _fq_vec_print(SK.get_alpha(), len, ctx);  */
+
+    /* cout << " "  << endl; */
+
+    /* fq_poly_t& h  = SK.g; */
+    /* // h = SK.get_g(); */
+    /* fq_poly_print_pretty(h, "X",  ctx); */
+    /* cout << " "  << endl; */
+
+    /* fq_poly_one(h, ctx); */
+    /* fq_poly_print_pretty(h, "X",  ctx); */
+    /* cout << " "  << endl; */
+    
+    /* fq_poly_print_pretty(SK.g, "X",  ctx); */
+    /* cout << " "  << endl;  */
+
+    
+    /* ************************************************************************* */
+    /* ************************************************************************* */
+    
 }

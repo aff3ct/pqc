@@ -41,6 +41,8 @@ void fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx, f
 
 
 /* POLYNOMIALS */
+void fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len, const fq_ctx_t ctx);
+
 int fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len, const fq_ctx_t ctx);
 
 void fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta, const int len,

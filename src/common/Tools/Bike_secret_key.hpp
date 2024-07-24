@@ -9,8 +9,8 @@ class Bike_secret_key {
 private:
     int r;
     fq_ctx_t* ctx_q;
-    
 
+    
 public:
     fq_poly_t h0;
     fq_poly_t h1;
