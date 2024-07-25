@@ -4,8 +4,8 @@
 #include "../../../../streampu/include/streampu.hpp"
 #include "../../Tools/tools.hpp"
 #include "../../Tools/codes.hpp"
-#include "../../Tools/CM_secret_key.hpp"
-#include "../../Tools/CM_public_key.hpp"
+#include "../../Tools/ClassicMcEliece/CM_secret_key.hpp"
+#include "../../Tools/ClassicMcEliece/CM_public_key.hpp"
 
 
 

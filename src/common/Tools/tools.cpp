@@ -21,6 +21,36 @@
 using namespace std;
 
 
+/* **************************************************************************** */
+/*                              MISCELLANEOUS                                   */
+/* **************************************************************************** */
+
+/* return integer r with "len" bits such that 2 is primitive modulo r */
+int
+random_suitable_integer(const int len) {
+    int res = 0;
+    FLINT_TEST_INIT(state);
+    fq_nmod_t a;
+    fq_nmod_ctx_t ctx;
+    while (1) {
+	res = n_randprime(state, len, 0);
+	fq_nmod_ctx_init_ui(ctx, res, 1, "x");
+	fq_nmod_init(a, ctx); fq_nmod_set_ui(a, 2, ctx);
+	if (fq_nmod_is_primitive(a, ctx))
+	    break;
+	
+    }
+    flint_randclear(state);
+    fq_nmod_clear(a, ctx);
+    fq_nmod_ctx_clear(ctx);
+    return res;
+}
+
+/* **************************************************************************** */
+/*                      RANDOM INDICES / PERMUTATIONS                           */
+/* **************************************************************************** */
+
+
 /* naive fisher-yates algorithm */
 void
 fisher_yates(int* perm, const int n) {

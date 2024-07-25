@@ -37,13 +37,15 @@
 #include "Tools/codes.hpp"
 
 
-#include "Tools/CM_secret_key.hpp"
-#include "Tools/CM_public_key.hpp"
-#include "Tools/CM_keygen.hpp"
+#include "Tools/ClassicMcEliece/CM_secret_key.hpp"
+#include "Tools/ClassicMcEliece/CM_public_key.hpp"
+#include "Tools/ClassicMcEliece/CM_keygen.hpp"
 
 
-#include "Tools/Bike_secret_key.hpp"
-#include "Tools/Bike_public_key.hpp"
+#include "Tools/Bike/Bike_secret_key.hpp"
+#include "Tools/Bike/Bike_public_key.hpp"
+#include "Tools/Bike/Bike_keygen.hpp"
+
 
 using namespace spu;
 using namespace spu::module;
@@ -80,34 +82,25 @@ int main(int argc, char** argv, char** env) {
     /* ************************************************************************* */
 
     /* !! needs r such that 2 is primitive mod r !!  */
+
+    int r = random_suitable_integer(6);
     
-    int r = 101;
+    // int r = 101;
     int len = 2*r;
     int weight = 10;
-
-
-
+    
     
     Bike_secret_key SK = Bike_secret_key(r, &ctx_q);
     Bike_public_key PK = Bike_public_key(r, &ctx_q);
-    int b;
-
-    for (int j = 0 ; j < 100; ++j) {
-      
-      SK.keygen(weight);
-
-      /* fq_poly_print_pretty(SK.h0, "t", ctx_q); */
-      /* printf("\n"); */
-      /* fq_poly_print_pretty(SK.h1, "t", ctx_q); */
-      /* printf("\n"); */
 
 
-      b = PK.keygen(SK);
+    Bike_keygen_naive(SK, PK, weight);
 
-      if (b == 1)
-	printf("Keygen succeeded ! \n");
-    }
     
+    // int b;
+    // SK.keygen(weight);
+    // b = PK.keygen(SK);
+    // printf("%d\n", b);
     
     /* ************************************************************************* */       
     /* ************************************************************************* */

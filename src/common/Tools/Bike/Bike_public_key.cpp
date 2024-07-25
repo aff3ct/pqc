@@ -1,4 +1,4 @@
-#include "tools.hpp"
+#include "../tools.hpp"
 #include "Bike_public_key.hpp"
 
 #include <iostream>
@@ -36,8 +36,8 @@ Bike_public_key::keygen(const Bike_secret_key& sk) {
     fq_poly_init(U, *(this->ctx_q)); // init U
     fq_poly_init(V, *(this->ctx_q)); // init V
     fq_poly_init(G, *(this->ctx_q)); // init G
-    fq_poly_init(P, *(this->ctx_q)); // init P = X^r-1
 
+    fq_poly_init(P, *(this->ctx_q)); // init P and set it to X^r-1
     fq_poly_zero(P, *(this->ctx_q));
     fq_t tmp; fq_init(tmp, *(this->ctx_q));
     fq_one(tmp, *(this->ctx_q));
@@ -45,12 +45,9 @@ Bike_public_key::keygen(const Bike_secret_key& sk) {
     fq_poly_set_coeff(P, 0, tmp, *(this->ctx_q));
 
        
-    fq_poly_xgcd(G, U, V, sk.h0, P, *(this->ctx_q));
-
-    fq_poly_print_pretty(G, "t", *(this->ctx_q));
-    printf("\n");
+    fq_poly_xgcd(G, U, V, sk.h0, P, *(this->ctx_q)); // gcd with h0 and ...
     
-    int b = fq_poly_is_one(G, *(this->ctx_q));
+    int b = fq_poly_is_one(G, *(this->ctx_q)); // ... verify it is coprime
 
     if (b == 1) {
 	fq_poly_mul(this->h, sk.h1, U, *(this->ctx_q));

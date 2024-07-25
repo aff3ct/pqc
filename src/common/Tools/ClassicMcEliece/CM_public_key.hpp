@@ -1,8 +1,8 @@
 #ifndef CM_PUBLIC_KEY_HPP
 #define CM_PUBLIC_KEY_HPP
 
-#include "tools.hpp"
-#include "codes.hpp"
+#include "../tools.hpp"
+#include "../codes.hpp"
 #include "CM_secret_key.hpp"
 
 class CM_public_key {

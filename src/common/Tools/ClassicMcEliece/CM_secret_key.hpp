@@ -1,8 +1,8 @@
 #ifndef CM_SECRET_KEY_HPP
 #define CM_SECRET_KEY_HPP
 
-#include "tools.hpp"
-#include "codes.hpp"
+#include "../tools.hpp"
+#include "../codes.hpp"
 
 
 class CM_secret_key {

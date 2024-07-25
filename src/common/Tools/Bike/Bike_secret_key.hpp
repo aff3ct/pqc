@@ -1,8 +1,8 @@
 #ifndef BIKE_SECRET_KEY_HPP
 #define BIKE_SECRET_KEY_HPP
 
-#include "tools.hpp"
-#include "codes.hpp"
+#include "../tools.hpp"
+#include "../codes.hpp"
 
 
 class Bike_secret_key {

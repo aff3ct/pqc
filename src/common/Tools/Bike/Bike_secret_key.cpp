@@ -1,6 +1,6 @@
 #include "Bike_secret_key.hpp"
 
-#include "tools.hpp"
+#include "../tools.hpp"
 
 #include <flint/fq_poly.h>
 

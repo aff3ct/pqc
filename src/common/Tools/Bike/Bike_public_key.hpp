@@ -1,8 +1,8 @@
 #ifndef BIKE_PUBLIC_KEY_HPP
 #define BIKE_PUBLIC_KEY_HPP
 
-#include "tools.hpp"
-#include "codes.hpp"
+#include "../tools.hpp"
+#include "../codes.hpp"
 #include "Bike_secret_key.hpp"
 
 class Bike_public_key {

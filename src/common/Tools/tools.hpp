@@ -4,13 +4,22 @@
 
 #include <flint/flint.h>
 #include <flint/fmpz.h>	/* large integers */
+#include <flint/ulong_extras.h>	/* word-size integers */
 #include <flint/fq.h>		/* finite fields */
+#include <flint/fq_nmod.h>		/* finite fields with word-size modulus */
 #include <flint/fq_poly.h>	/* pol. in finite fields */
 #include <flint/fmpz_poly.h>	/* pol. in integers */
 #include <flint/fmpz_vec.h>	/* vectors integers */
 #include <flint/fq_vec.h>	/* vectors finite fields */
 #include <flint/fq_mat.h>	/* matrix / finite fields */
 #include <flint/perm.h>	/* permutations */
+
+
+
+
+/* MISCELLANEOUS */
+int random_suitable_integer(const int len);
+
 
 /* ERROR GENERATION */
 // Bike

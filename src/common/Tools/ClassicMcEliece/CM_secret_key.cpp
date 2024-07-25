@@ -1,6 +1,6 @@
 #include "CM_secret_key.hpp"
 
-#include "tools.hpp"
+#include "../tools.hpp"
 
 #include <iostream>
 
