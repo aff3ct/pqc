@@ -42,6 +42,9 @@ void
 CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len, 
 	    const fq_ctx_t& ctx_q);
 
+void 
+Bike_encoding(fq_poly_t res, const int* e, const fq_poly_t h, const int r, const fq_ctx_t& ctx_q);
+
 
 // DECODER
 int

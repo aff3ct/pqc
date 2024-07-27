@@ -311,7 +311,8 @@ Goppa_parity_check(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, cons
 
 
 
-/* computes the parity check matrix of a Goppa code knowing it is *BINARY* */
+/** Computes the parity check matrix of a Goppa code knowing it is *BINARY*
+*/
 void
 Goppa_parity_check_bin(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, const fq_ctx_t ctx) {
     int i, j, n, m;
@@ -354,6 +355,55 @@ CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len
     
     fq_mat_clear(H, ctx_q); /* clearing memory */
 }
+
+
+
+/** encoding as in Bike
+ * Compute s = e0 + e1 * h modulo X^r - 1
+*/
+void 
+Bike_encoding(fq_poly_t res, const int* e, const fq_poly_t h, const int r, const fq_ctx_t& ctx_q) {
+    /* init P to X^r -1 */
+    fq_poly_t P;
+    fq_poly_init(P, ctx_q); 
+    fq_poly_zero(P, ctx_q);
+    fq_t tmp; fq_init(tmp, ctx_q);
+    fq_one(tmp, ctx_q);
+    fq_poly_set_coeff(P, r, tmp, ctx_q);
+    fq_poly_set_coeff(P, 0, tmp, ctx_q);
+    
+    fq_poly_t e0, e1;
+    fq_poly_init(e0, ctx_q);
+    fq_poly_init(e1, ctx_q);
+    
+    fq_struct* tmp_vec = _fq_vec_init(r, ctx_q);
+
+    int E[r];
+    
+    /* set e0 to e[0..r-1] */
+    for (int i = 0 ; i < r; ++i)
+	E[i] = e[i];
+    _int_vec_2_fq(tmp_vec, E, r, ctx_q);
+    fq_poly_set_coeffs(e0, tmp_vec, r, ctx_q);
+
+    /* set e1 to e[r..2r-1] */
+    for (int i = 0 ; i < r; ++i)
+	E[i] = e[i+r];
+    _int_vec_2_fq(tmp_vec, E, r, ctx_q);
+    fq_poly_set_coeffs(e1, tmp_vec, r, ctx_q);
+
+
+    fq_poly_mulmod(res, e1, h, P, ctx_q);
+    fq_poly_add(res, res, e0, ctx_q);
+
+
+    fq_clear(tmp, ctx_q);
+    _fq_vec_clear(tmp_vec, r, ctx_q);
+    fq_poly_clear(e0, ctx_q);
+    fq_poly_clear(e1, ctx_q);
+    fq_poly_clear(P, ctx_q);
+}
+
 
 
 /* **************************************************************************** */

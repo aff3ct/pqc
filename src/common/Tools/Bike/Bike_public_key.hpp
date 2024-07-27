@@ -21,7 +21,6 @@ public:
 
     
     int keygen(const Bike_secret_key& sk);
-    // fq_mat_t get_T() const;
 };
 
 

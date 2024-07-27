@@ -19,18 +19,6 @@
 #include "flint/perm.h"		/* permutations */
 #include "flint/fq_mat.h"	/* matrix / finite fields */
 
-
-
-// #include "VTop_Level.h"
-// #include "VerilatorSimulation.hpp"
-// #include "MySource.hpp"
-#include "Modules/Comparator/Comparator.hpp"
-#include "Modules/SyndComparator/SyndComparator.hpp"
-#include "Modules/CM_RandomFixedWeight/CM_RandomFixedWeight.hpp"
-#include "Modules/Bike_RandomFixedWeight/Bike_RandomFixedWeight.hpp"
-#include "Modules/CM_Encoder/CM_Encoder.hpp"
-#include "Modules/CM_Decoder/CM_Decoder.hpp"
-
 // #include "SerialPort.hpp"
 
 #include "Tools/tools.hpp"
@@ -45,6 +33,20 @@
 #include "Tools/Bike/Bike_secret_key.hpp"
 #include "Tools/Bike/Bike_public_key.hpp"
 #include "Tools/Bike/Bike_keygen.hpp"
+
+
+
+// #include "VTop_Level.h"
+// #include "VerilatorSimulation.hpp"
+// #include "MySource.hpp"
+#include "Modules/Comparator/Comparator.hpp"
+#include "Modules/SyndComparator/SyndComparator.hpp"
+#include "Modules/CM_RandomFixedWeight/CM_RandomFixedWeight.hpp"
+#include "Modules/Bike_RandomFixedWeight/Bike_RandomFixedWeight.hpp"
+#include "Modules/CM_Encoder/CM_Encoder.hpp"
+#include "Modules/Bike_Encoder/Bike_Encoder.hpp"
+#include "Modules/CM_Decoder/CM_Decoder.hpp"
+
 
 
 using namespace spu;
@@ -85,6 +87,7 @@ int main(int argc, char** argv, char** env) {
 
     int r = random_suitable_integer(6);
     
+    
     // int r = 101;
     int len = 2*r;
     int weight = 10;
@@ -92,15 +95,59 @@ int main(int argc, char** argv, char** env) {
     
     Bike_secret_key SK = Bike_secret_key(r, &ctx_q);
     Bike_public_key PK = Bike_public_key(r, &ctx_q);
-
-
+    
+    
     Bike_keygen_naive(SK, PK, weight);
 
+    const int FRAME_SIZE = len;
+    const int WEIGHT = weight;
+
+    module::Initializer   <int> initializer(FRAME_SIZE);
+    module::Incrementer   <int> incr1(FRAME_SIZE);
+    module::Finalizer     <int> finalizer(r);
+
+    module::Bike_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT);
+    module::Bike_Encoder bike_encode(PK);
+
+
+        
+    initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"];
+    randfixed   ["random_fixed_weight::output" ] = bike_encode   ["bike_encoder::input"];
+    bike_encode ["bike_encoder::output"] = finalizer ["finalize::in"  ];
+
+
+    // randfixed   ["random_fixed_weight::output" ] = comp ["compare::input1" ];
+    // cm_decode ["cm_decoder::output"] = comp ["compare::input2" ];
+    // cm_encode ["cm_encoder::output"] = comp ["compare::input3" ];
+
+    // comp ["compare::output"] = finalizer ["finalize::in"];
     
-    // int b;
-    // SK.keygen(weight);
-    // b = PK.keygen(SK);
-    // printf("%d\n", b);
+    // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
+
+
+    
+    // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"];
+    // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"];
+    // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"];
+
+    std::vector<runtime::Task*> first = {&initializer("initialize")};
+
+    runtime::Sequence seq(first);
+
+    std::ofstream file("graph.dot");
+    seq.export_dot(file);
+
+    for (auto lt : seq.get_tasks_per_types())
+        for (auto t : lt)
+	    {
+		t->set_stats(true);
+		t->set_debug(true);
+	    }
+
+    seq.exec_seq();
+    // seq.exec_seq();
+
+
     
     /* ************************************************************************* */       
     /* ************************************************************************* */

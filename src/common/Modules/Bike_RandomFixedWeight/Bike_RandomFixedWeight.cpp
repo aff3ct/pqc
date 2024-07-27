@@ -1,6 +1,5 @@
 #include <random>
 #include "Bike_RandomFixedWeight.hpp"
-
 using namespace spu;
 using namespace spu::module;
 
@@ -20,14 +19,14 @@ Bike_RandomFixedWeight::Bike_RandomFixedWeight(int frame_size, int weight) :
     this->create_codelet(t, [input, output](Module &m, runtime::Task &t,
 					    const size_t frame_id) -> int {
 	static_cast<Bike_RandomFixedWeight&>(m).random_fixed_weight(static_cast<int*>(t[input].get_dataptr()),
-							       static_cast<int*>(t[output].get_dataptr()),
-							       frame_id);
+								    static_cast<int*>(t[output].get_dataptr()),
+								    frame_id);
 	return 0;
     });
 }
 
 Bike_RandomFixedWeight::~Bike_RandomFixedWeight() {
-}    
+}
 
 void Bike_RandomFixedWeight::random_fixed_weight(int* input, int* output, const int frame_id) { 
 
@@ -43,15 +42,9 @@ void Bike_RandomFixedWeight::random_fixed_weight(int* input, int* output, const 
   
     bike_gen_e(e, frame_size, weight);
   
-    for(auto i = 0; i < frame_size; i++)
-	{
-	    output[i] += e[i];
-	}
-  
-    // for(auto i = 0; i < weight; i++)
-    //   {
-    //     output[dis(rand_gen)] += 1;
-    //   }
+    for(auto i = 0; i < frame_size; i++) {
+	output[i] += e[i];
+    }
 }
 
 
