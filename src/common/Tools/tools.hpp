@@ -70,4 +70,17 @@ void xgcd_abort(fq_poly_t u, fq_poly_t v, fq_poly_t d, const fq_poly_t a, const 
 void fq_matrix_expand(fq_mat_t res, const fq_mat_t H, const fq_ctx_t ctx,
 		      const fq_ctx_t ctx_q);
 
+
+
+int
+ctr(const fq_struct *v, const fq_mat_t &H,  const int j, const fq_ctx_t ctx);
+
+void
+BFIter(fq_struct* e, int* black, int* gray, const fq_struct* s,
+       const fq_mat_t& H, const int T, const int tau, const fq_ctx_t ctx);
+
+void
+BFMaskedIter(fq_struct* e, const fq_struct* s, const fq_mat_t& H, const int T,
+	     const int* mask, const fq_ctx_t ctx);
+
 #endif // TOOLS_H

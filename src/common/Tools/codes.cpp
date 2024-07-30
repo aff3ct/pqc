@@ -358,7 +358,7 @@ CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len
 
 
 
-/** encoding as in Bike
+/** Encoding as in Bike
  * Compute s = e0 + e1 * h modulo X^r - 1
 */
 void 
@@ -458,3 +458,4 @@ CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* al
   
     return b;
 }
+

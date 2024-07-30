@@ -263,7 +263,7 @@ fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len,
 }
 
 
-/* computes the unique polynomial */
+/* Computes the unique polynomial P defined by points α and β, i.e. s.t P(αᵢ) = βᵢ */
 void
 fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta, const int len,
 		    const fq_ctx_t ctx) {
@@ -304,7 +304,7 @@ fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  bet
 }
 
 
-/* compute an irreducible polynomial of degree "deg" as in CM ie so that it generates a Goppa code
+/* Compute an irreducible polynomial of degree "deg" as in CM ie so that it generates a Goppa code
    together with the roots alpha Γ(alpha, res)  
 */
 void
@@ -317,7 +317,7 @@ cm_fq_poly_irr_pol(fq_poly_t& res, const int deg, const fq_struct* alpha, const 
 }
 
 
-/* computes early abort extended gcd of a and b in finite field defined by context ctx */
+/* Computes early abort extended gcd of a and b in finite field defined by context ctx */
 void
 xgcd_abort(fq_poly_t u, fq_poly_t v, fq_poly_t d, const fq_poly_t a, const fq_poly_t b,
 	   const slong k, const fq_ctx_t ctx) {
@@ -380,7 +380,7 @@ xgcd_abort(fq_poly_t u, fq_poly_t v, fq_poly_t d, const fq_poly_t a, const fq_po
 /*                                 MATRICES                                     */
 /* **************************************************************************** */
 
-/* expansion of a matrix over F_q^m to a matrix over FF_q
+/* Expansion of a matrix over F_q^m to a matrix over FF_q
  * NEED TO OBTAIN OUTPUT AS A MATRIX IN FF_q
  */
 void
@@ -411,4 +411,78 @@ fq_matrix_expand(fq_mat_t res, const fq_mat_t H, const fq_ctx_t ctx, const fq_ct
     /* clearing memory */
     fq_clear(tmp_q, ctx_q);
     fmpz_poly_clear(pol);
+}
+
+
+/** 
+ * Counter function as in Bike documentation.
+ * Computes the number of agreeing bits in vector v and jth column vector of H.
+ */
+int
+ctr(const fq_struct* v, const fq_mat_t& H,  const int j, const fq_ctx_t ctx) {
+    int count = 0;
+    
+    int r = fq_mat_nrows(H, ctx);
+    
+    for (int i = 0; i < r; ++i) {
+	if (fq_equal(&v[i], fq_mat_entry(H, i, j), ctx)) {
+	    count++;
+	}
+    }
+
+    return count;
+}
+
+
+
+/**
+ * Computes black and gray positions as in Bike specification doc.
+ */
+void
+BFIter(fq_struct* e, int* black, int* gray, const fq_struct* s,
+       const fq_mat_t& H, const int T, const int tau, const fq_ctx_t ctx) {
+    int i, j;
+
+    int n = fq_mat_ncols(H, ctx);
+
+    fq_t one;     fq_init(one, ctx); fq_set_ui(one, 1, ctx);
+    
+    /* initialisation black and gray vectors */
+    for (i = 0; i < n; ++i) {
+	black[i] = 0;
+	gray[i] = 0;
+    }
+
+    for (j = 0; j < n; ++j) {
+	if (ctr(s, H, j, ctx) >= T) {
+	    fq_add(&e[j], &e[j], one, ctx);
+	    black[j] = 1;
+	} else if (ctr(s, H, j, ctx) >= T - tau) {
+	    gray[j] = 1;
+	}
+    }
+    fq_clear(one, ctx);
+}
+
+
+/**
+ * Modify e using black or gray positions as in Bike specification doc.
+ */
+void
+BFMaskedIter(fq_struct* e, const fq_struct* s, const fq_mat_t& H, const int T,
+	     const int* mask, const fq_ctx_t ctx) {
+    int j;
+
+    int n = fq_mat_ncols(H, ctx);    
+
+    fq_t tmp;
+    fq_init(tmp, ctx);
+    
+    for (j = 0; j < n; ++j) {
+	if (ctr(s, H, j, ctx) >= T) {
+	    fq_set_ui(tmp, mask[j], ctx);
+	    fq_add(&e[j], &e[j], tmp, ctx);
+	} 
+    }
+    fq_clear(tmp, ctx);
 }
