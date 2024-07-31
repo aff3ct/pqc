@@ -1,5 +1,6 @@
 #include "codes.hpp"
 #include <iostream>
+#include <flint/fq_mat.h>
 
 // /* **************************************************************************** */
 // /*                            structures of keys                                */
@@ -462,7 +463,42 @@ CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* al
 
 
 /* Decoding as in Bike : use the Black-Gray-Flip (BGF) algorithm */
-void
-Bike_decoding() {
+int
+Bike_decoding(fq_struct* res, const fq_struct* s, const fq_mat_t& H,
+	      const int weight, const int NbIter, const int tau,
+	      const fq_ctx_t ctx_q) {
+    int i, T, w;
+    int r = fq_mat_nrows(H, ctx_q);
+    int n = 2*r;
+    int d = (weight/2 + 1)/2 + 1;
+    int b = 0;
+    fq_struct* e = _fq_vec_init(n, ctx_q);
+    fq_struct* tmp = _fq_vec_init(r, ctx_q);
+    fq_struct* synd = _fq_vec_init(r, ctx_q);
+    int black[n]; int gray[n];
+
     
+    for (i = 0; i < NbIter; ++i) {
+	fq_mat_mul_vec(tmp, H, e, n, ctx_q);
+	_fq_vec_add(tmp, tmp, s, r, ctx_q);
+	w = hamming_weight(tmp, r, ctx_q);
+	T = compute_threshold(w, i);
+	BFIter(e, black, gray, tmp , H, T, tau, ctx_q);
+	if (i==1) {
+	    BFMaskedIter(e, tmp, H, d, black, ctx_q);
+	    BFMaskedIter(e, tmp, H, d, gray, ctx_q);
+	}
+    }
+    
+    fq_mat_mul_vec(synd, H, e, n, ctx_q);
+    if (_fq_vec_equal(s, synd, r, ctx_q)) {
+	_fq_vec_set(res, e, n, ctx_q);
+	b = 1;
+    }
+    _fq_vec_clear(synd, r, ctx_q);
+    _fq_vec_clear(tmp, r, ctx_q);
+    _fq_vec_clear(e, n, ctx_q);
+
+    return b;
 }
+ 

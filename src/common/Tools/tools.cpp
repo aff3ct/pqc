@@ -47,9 +47,10 @@ random_suitable_integer(const int len) {
 }
 
 
-/* Computes the threshold
+/**
+ * Computes the threshold for the BGF algo.
  * Ad-hoc definition
- * TODO : find a better definition
+ * TODO: find a better definition
  */
 int
 compute_threshold(const int w, const int dim) {
@@ -57,6 +58,19 @@ compute_threshold(const int w, const int dim) {
 }
 
 
+/**
+ * Short: Hamming weight of a vector.
+ */
+int
+hamming_weight(const fq_struct* v, const int len, const fq_ctx_t ctx) {
+    int count = 0;
+    for (int i = 0; i < len; ++i) {
+	if (fq_is_zero(&v[i], ctx)) {
+	    count++;
+	}
+    }
+    return count;
+}
 
 /* **************************************************************************** */
 /*                      RANDOM INDICES / PERMUTATIONS                           */
@@ -68,9 +82,8 @@ void
 fisher_yates(int* perm, const int n) {
     int j;
   
-    std::random_device rd;
+    std::random_device rd; 
     std::mt19937 rand_gen(rd());
-  
   
     for (int i = 0; i < n; ++i) {
 	std::uniform_int_distribution<std::mt19937::result_type> dis(0, i);
@@ -275,7 +288,9 @@ fq_poly_set_cyclic(fq_poly_t res, const int d, const fq_ctx_t ctx) {
 
 
 
-/* check if f has a root in alpha */
+/**
+ * Check if f has a root in alpha.
+ */
 int
 fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len,
 		  const fq_ctx_t ctx) {
@@ -292,7 +307,10 @@ fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len,
 }
 
 
-/* Computes the unique polynomial P defined by points α and β, i.e. s.t P(αᵢ) = βᵢ */
+/**
+ * Computes the unique polynomial P defined by points α and β,
+ * i.e. s.t P(αᵢ) = βᵢ
+ */
 void
 fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta, const int len,
 		    const fq_ctx_t ctx) {
@@ -333,8 +351,9 @@ fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  bet
 }
 
 
-/* Compute an irreducible polynomial of degree "deg" as in CM ie so that it generates a Goppa code
-   together with the roots alpha Γ(alpha, res)  
+/**
+ * Compute an irreducible polynomial of degree "deg" as in CM ie so that it
+ * generates a Goppa code together with the roots alpha Γ(alpha, res)  
 */
 void
 cm_fq_poly_irr_pol(fq_poly_t& res, const int deg, const fq_struct* alpha, const int len,
@@ -346,7 +365,10 @@ cm_fq_poly_irr_pol(fq_poly_t& res, const int deg, const fq_struct* alpha, const 
 }
 
 
-/* Computes early abort extended gcd of a and b in finite field defined by context ctx */
+/**
+ * Computes early abort extended gcd of a and b in finite field
+ * defined by context ctx.
+ */
 void
 xgcd_abort(fq_poly_t u, fq_poly_t v, fq_poly_t d, const fq_poly_t a, const fq_poly_t b,
 	   const slong k, const fq_ctx_t ctx) {
@@ -539,5 +561,3 @@ fq_mult_matrix(fq_mat_t res, const fq_poly_t h, const fq_poly_t P, const fq_ctx_
     fq_poly_clear(tmp_pol, ctx);
     fq_poly_clear(gen, ctx);
 }
-
-

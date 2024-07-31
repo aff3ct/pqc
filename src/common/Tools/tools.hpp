@@ -23,6 +23,8 @@ int random_suitable_integer(const int len);
 int
 compute_threshold(const int w, const int dim);
 
+int
+hamming_weight(const fq_struct* v, const int len, const fq_ctx_t ctx);
 
 
 /* ERROR GENERATION */
