@@ -46,6 +46,18 @@ random_suitable_integer(const int len) {
     return res;
 }
 
+
+/* Computes the threshold
+ * Ad-hoc definition
+ * TODO : find a better definition
+ */
+int
+compute_threshold(const int w, const int dim) {
+    return std::max(0.005*w + 15, 42.);
+}
+
+
+
 /* **************************************************************************** */
 /*                      RANDOM INDICES / PERMUTATIONS                           */
 /* **************************************************************************** */
@@ -237,6 +249,8 @@ fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx, flint_
 /*                           POLYNOMIAL MANIPUTATION                            */
 /* **************************************************************************** */
 
+
+
 /* set the coeffs of polynomial */
 void
 fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len, const fq_ctx_t ctx) {
@@ -244,6 +258,21 @@ fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len, const fq_
 	fq_poly_set_coeff(f, i, &alpha[i], ctx);
     }
 }
+
+
+/**
+ * Sets res to "cyclic polynomial generator", i.e. X^d - 1 (over FF_2)
+ */
+void
+fq_poly_set_cyclic(fq_poly_t res, const int d, const fq_ctx_t ctx) {
+    fq_poly_zero(res, ctx);
+    fq_t tmp; fq_init(tmp, ctx);
+    fq_one(tmp, ctx);
+    fq_poly_set_coeff(res, d, tmp, ctx);
+    fq_poly_set_coeff(res, 0, tmp, ctx);
+    fq_clear(tmp, ctx);
+}
+
 
 
 /* check if f has a root in alpha */
@@ -486,3 +515,29 @@ BFMaskedIter(fq_struct* e, const fq_struct* s, const fq_mat_t& H, const int T,
     }
     fq_clear(tmp, ctx);
 }
+
+
+/**
+ * Computes multiplication matrix of h in FF_q[X] / (P(X))
+ */
+void
+fq_mult_matrix(fq_mat_t res, const fq_poly_t h, const fq_poly_t P, const fq_ctx_t ctx) {
+    int i, j, d = fq_poly_degree(P, ctx);
+    fq_t tmp; fq_init(tmp, ctx);
+    fq_poly_t tmp_pol, gen;
+    fq_poly_init(tmp_pol, ctx);     fq_poly_init(gen, ctx);
+    fq_poly_set(tmp_pol, h, ctx);   fq_poly_gen(gen, ctx);
+    
+    for (i = 0; i < d; ++i) {
+	for (j = 0; j < d; ++j) {
+	    fq_poly_get_coeff(tmp, tmp_pol, j, ctx);
+	    fq_mat_entry_set(res, i, j, tmp, ctx);
+	}
+	fq_poly_mulmod(tmp_pol, tmp_pol, gen, P, ctx);
+    }
+    fq_clear(tmp, ctx);
+    fq_poly_clear(tmp_pol, ctx);
+    fq_poly_clear(gen, ctx);
+}
+
+

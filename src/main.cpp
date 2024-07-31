@@ -21,7 +21,7 @@
 
 // #include "SerialPort.hpp"
 
-#include "Tools/tools.hpp"
+#include "common/Tools/tools.hpp"
 #include "Tools/codes.hpp"
 
 
@@ -98,54 +98,70 @@ int main(int argc, char** argv, char** env) {
     
     
     Bike_keygen_naive(SK, PK, weight);
+    
+    fq_mat_t H0;
+    fq_mat_init(H0, r, r, ctx_q);
+    fq_poly_t P;
+    fq_poly_init(P, ctx_q);
+    fq_poly_set_cyclic(P, r, ctx_q);
 
-    const int FRAME_SIZE = len;
-    const int WEIGHT = weight;
 
-    module::Initializer   <int> initializer(FRAME_SIZE);
-    module::Incrementer   <int> incr1(FRAME_SIZE);
-    module::Finalizer     <int> finalizer(r);
+    fq_mult_matrix(H0, SK.h0, P, ctx_q);
 
-    module::Bike_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT);
-    module::Bike_Encoder bike_encode(PK);
+
+    fq_mat_print_pretty(H0, ctx_q);
+      
+    
+
+
+    
+    // const int FRAME_SIZE = len;
+    // const int WEIGHT = weight;
+
+    // module::Initializer   <int> initializer(FRAME_SIZE);
+    // module::Incrementer   <int> incr1(FRAME_SIZE);
+    // module::Finalizer     <int> finalizer(r);
+
+    // module::Bike_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT);
+    // module::Bike_Encoder bike_encode(PK);
 
 
         
-    initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"];
-    randfixed   ["random_fixed_weight::output" ] = bike_encode   ["bike_encoder::input"];
-    bike_encode ["bike_encoder::output"] = finalizer ["finalize::in"  ];
+    // initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"];
+    // randfixed   ["random_fixed_weight::output" ] = bike_encode   ["bike_encoder::input"];
+    // bike_encode ["bike_encoder::output"] = finalizer ["finalize::in"  ];
 
 
-    // randfixed   ["random_fixed_weight::output" ] = comp ["compare::input1" ];
-    // cm_decode ["cm_decoder::output"] = comp ["compare::input2" ];
-    // cm_encode ["cm_encoder::output"] = comp ["compare::input3" ];
+    // // randfixed   ["random_fixed_weight::output" ] = comp ["compare::input1" ];
+    // // cm_decode ["cm_decoder::output"] = comp ["compare::input2" ];
+    // // cm_encode ["cm_encoder::output"] = comp ["compare::input3" ];
 
-    // comp ["compare::output"] = finalizer ["finalize::in"];
+    // // comp ["compare::output"] = finalizer ["finalize::in"];
     
-    // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
+    // // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
 
 
     
-    // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"];
-    // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"];
-    // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"];
+    // // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"];
+    // // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"];
+    // // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"];
 
-    std::vector<runtime::Task*> first = {&initializer("initialize")};
+    // std::vector<runtime::Task*> first = {&initializer("initialize")};
 
-    runtime::Sequence seq(first);
+    // runtime::Sequence seq(first);
 
-    std::ofstream file("graph.dot");
-    seq.export_dot(file);
+    // std::ofstream file("graph.dot");
+    // seq.export_dot(file);
 
-    for (auto lt : seq.get_tasks_per_types())
-        for (auto t : lt)
-	    {
-		t->set_stats(true);
-		t->set_debug(true);
-	    }
+    // for (auto lt : seq.get_tasks_per_types())
+    //     for (auto t : lt)
+    // 	    {
+    // 		t->set_stats(true);
+    // 		t->set_debug(true);
+    // 	    }
 
-    seq.exec_seq();
     // seq.exec_seq();
+    // // seq.exec_seq();
 
 
     

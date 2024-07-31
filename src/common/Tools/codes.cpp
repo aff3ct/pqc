@@ -459,3 +459,10 @@ CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* al
     return b;
 }
 
+
+
+/* Decoding as in Bike : use the Black-Gray-Flip (BGF) algorithm */
+void
+Bike_decoding() {
+    
+}

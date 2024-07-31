@@ -20,6 +20,10 @@
 /* MISCELLANEOUS */
 int random_suitable_integer(const int len);
 
+int
+compute_threshold(const int w, const int dim);
+
+
 
 /* ERROR GENERATION */
 // Bike
@@ -52,6 +56,8 @@ void fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx, f
 /* POLYNOMIALS */
 void fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len, const fq_ctx_t ctx);
 
+void fq_poly_set_cyclic(fq_poly_t res, const int d, const fq_ctx_t ctx);
+
 int fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len, const fq_ctx_t ctx);
 
 void fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta, const int len,
@@ -71,7 +77,6 @@ void fq_matrix_expand(fq_mat_t res, const fq_mat_t H, const fq_ctx_t ctx,
 		      const fq_ctx_t ctx_q);
 
 
-
 int
 ctr(const fq_struct *v, const fq_mat_t &H,  const int j, const fq_ctx_t ctx);
 
@@ -82,5 +87,10 @@ BFIter(fq_struct* e, int* black, int* gray, const fq_struct* s,
 void
 BFMaskedIter(fq_struct* e, const fq_struct* s, const fq_mat_t& H, const int T,
 	     const int* mask, const fq_ctx_t ctx);
+
+void
+fq_mult_matrix(fq_mat_t res, const fq_poly_t h, const fq_poly_t P, const fq_ctx_t ctx);
+
+
 
 #endif // TOOLS_H
