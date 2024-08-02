@@ -22,7 +22,7 @@
 // #include "SerialPort.hpp"
 
 #include "common/Tools/tools.hpp"
-#include "Tools/codes.hpp"
+#include "common/Tools/codes.hpp"
 
 
 #include "Tools/ClassicMcEliece/CM_secret_key.hpp"
@@ -85,35 +85,85 @@ int main(int argc, char** argv, char** env) {
 
     /* !! needs r such that 2 is primitive mod r !!  */
 
-    int r = random_suitable_integer(6);
+    int r = random_suitable_integer(9);
     
     
     // int r = 101;
     int len = 2*r;
+    int n = len;
     int weight = 10;
     
     
     Bike_secret_key SK = Bike_secret_key(r, &ctx_q);
     Bike_public_key PK = Bike_public_key(r, &ctx_q);
-    
-    
+        
     Bike_keygen_naive(SK, PK, weight);
     
-    fq_mat_t H0;
+    fq_mat_t H0, H1;
     fq_mat_init(H0, r, r, ctx_q);
+    fq_mat_init(H1, r, r, ctx_q);
     fq_poly_t P;
     fq_poly_init(P, ctx_q);
     fq_poly_set_cyclic(P, r, ctx_q);
 
 
     fq_mult_matrix(H0, SK.h0, P, ctx_q);
-
+    fq_mult_matrix(H1, SK.h1, P, ctx_q);
 
     fq_mat_print_pretty(H0, ctx_q);
-      
+
+    fq_mat_t H;
+    fq_mat_init(H, r, n, ctx_q);
+    fq_mat_concat_horizontal(H, H0, H1, ctx_q);
+    fq_mat_print_pretty(H, ctx_q);
+
+    int e[n];
+    for (int i = 0; i < n; ++i) {
+	e[i] = 0;
+    }
+    bike_gen_e(e, n, weight);
+
+    fq_struct* ee = _fq_vec_init(n, ctx_q);
+    _int_vec_2_fq(ee, e, n, ctx_q);
     
 
+    fq_struct* s = _fq_vec_init(r, ctx_q);
+    fq_poly_t sp; fq_poly_init(sp, ctx_q);
+    fq_poly_zero(sp, ctx_q);
+    
+    Bike_encoding(sp, e, PK.h,  r, ctx_q);
 
+    fq_struct* ss = _fq_vec_init(r, ctx_q);
+
+    
+    // fq_poly_set_coeffs(sp, s, r, ctx_q);
+
+    fq_poly_mul(sp, sp, SK.h0, ctx_q);
+    for (int k = 0; k < r; k++) {
+	fq_poly_get_coeff(&ss[k], sp, k, ctx_q);
+    }
+    
+    
+    fq_struct* res = _fq_vec_init(n, ctx_q);
+    
+    // fq_mat_mul_vec(s, H, ee, n, ctx_q);
+
+    int b = Bike_decoding(res, ss, H, weight, 5, 3, ctx_q);
+
+    printf("%d \n", b);
+
+    
+    _fq_vec_print(res, n, ctx_q);
+    printf("\n");
+
+    for (int ii = 0; ii < n; ii++) {
+	fq_print_pretty(&ee[ii], ctx_q);
+	    printf(" ");
+    }
+    printf("\n");
+    // _fq_vec_print(ee, n, ctx_q);
+    
+    
     
     // const int FRAME_SIZE = len;
     // const int WEIGHT = weight;
