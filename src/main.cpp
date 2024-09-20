@@ -150,17 +150,22 @@ int main(int argc, char** argv, char** env) {
 
     fq_poly_t P; fq_poly_init(P, ctx_q); fq_poly_set_cyclic(P, r, ctx_q);
     fq_struct* s = _fq_vec_init(r, ctx_q);
-    fq_poly_t sp; fq_poly_init(sp, ctx_q); fq_poly_t sp1; fq_poly_init(sp1, ctx_q);
-    fq_poly_mulmod(sp, e0, SK.h0, P, ctx_q);
-    fq_poly_mulmod(sp1, e1, SK.h1, P, ctx_q);
-    fq_poly_add(sp, sp, sp1, ctx_q);
+
+    fq_poly_t sp; fq_poly_init(sp, ctx_q);
+
+    /* fq_poly_t sp1; fq_poly_init(sp1, ctx_q); */
+    /* fq_poly_mulmod(sp, e0, SK.h0, P, ctx_q); */
+    /* fq_poly_mulmod(sp1, e1, SK.h1, P, ctx_q); */
+    /* fq_poly_add(sp, sp, sp1, ctx_q); */
     
     /* !!!  encoding and transformation does not seem to work !!! */
-    /* fq_poly_zero(sp, ctx_q); */
-    /* Bike_encoding(sp, e, PK.h,  r, ctx_q); */
-    // // fq_poly_set_coeffs(sp, s, r, ctx_q);
-    // fq_poly_mul(sp, sp, SK.h0, ctx_q);
+    fq_poly_zero(sp, ctx_q);
+    Bike_encoding(sp, e, PK.h,  r, ctx_q);
+    /* // fq_poly_set_coeffs(sp, s, r, ctx_q); */
+    fq_poly_mulmod(sp, sp, SK.h0, P, ctx_q);
 
+
+    
     fq_struct* ss = _fq_vec_init(r, ctx_q);
 
     
