@@ -107,7 +107,7 @@ RS_decoder(fq_poly_t res, const fq_struct* c, const fq_struct* alpha, const int 
 /* Decoding algorithm for Generalised Reed-Solomon codes */
 int
 GRS_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq_struct* beta,
-	    const int n, const int k, const fq_ctx_t ctx) {
+	    const int n, const int k, const fq_ctx_t ctx) { 
     /* declaration and init of local variables */
     fq_t tmp; fq_init(tmp, ctx);
     fq_struct* c1 = _fq_vec_init(n, ctx);
@@ -179,8 +179,8 @@ Goppa_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const 
 
 /* Decoding algorithm for *BINARY* Goppa codes */
 int
-Goppa_decoder_bin(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq_poly_t g,
-		  const int n, const int k, const fq_ctx_t ctx) {
+Goppa_decoder_bin(fq_struct* res, const fq_struct* c, const fq_struct* alpha,
+		  const fq_poly_t g, const int n, const int k, const fq_ctx_t ctx) {
 
     /* declaration and init of local variables */
     fq_poly_t A, tmp_poly, Aprime;
@@ -265,8 +265,8 @@ Goppa_codeword_random(fq_struct* res, const fq_struct* alpha, const fq_poly_t g,
 
 
 void
-Goppa_codeword_random_bin(fq_struct* res, const fq_struct* alpha, const fq_poly_t g, const int len,
-			  const fq_ctx_t ctx, flint_rand_t state) {
+Goppa_codeword_random_bin(fq_struct* res, const fq_struct* alpha, const fq_poly_t g,
+			  const int len, const fq_ctx_t ctx, flint_rand_t state) {
     fq_poly_t g2;
     fq_poly_init(g2, ctx);
     fq_poly_sqr(g2, g, ctx);
@@ -381,7 +381,7 @@ Bike_encoding(fq_poly_t res, const int* e, const fq_poly_t h, const int r, const
 
     int E[r];
     
-    /* set e0 to e[0..r-1] */
+    /* Set e0 to e[0..r-1] */
     for (int i = 0 ; i < r; ++i)
 	E[i] = e[i];
     _int_vec_2_fq(tmp_vec, E, r, ctx_q);
@@ -415,8 +415,8 @@ Bike_encoding(fq_poly_t res, const int* e, const fq_poly_t h, const int r, const
 
 /* decode syndrome as in CM */
 int
-CM_syndrome_decoding(fq_struct* res, const fq_struct* s, const fq_struct* alpha, const fq_poly_t g,
-		     const int len, const int t, const fq_ctx_t ctx) {
+CM_syndrome_decoding(fq_struct* res, const fq_struct* s, const fq_struct* alpha,
+		     const fq_poly_t g, const int len, const int t, const fq_ctx_t ctx) {
     int d = fq_poly_degree(g, ctx);
     int m = fq_ctx_degree(ctx);
 
@@ -439,8 +439,8 @@ CM_syndrome_decoding(fq_struct* res, const fq_struct* s, const fq_struct* alpha,
 
 /* decode syndrome as in CM */
 int
-CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* alpha, const fq_poly_t g,
-			 const int len, const int t, const fq_ctx_t ctx) {
+CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* alpha,
+			 const fq_poly_t g, const int len, const int t, const fq_ctx_t ctx) {
     int d = fq_poly_degree(g, ctx);
     int m = fq_ctx_degree(ctx);
 
@@ -462,11 +462,14 @@ CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* al
 
 
 
-/* Decoding as in Bike : use the Black-Gray-Flip (BGF) algorithm */
+/**
+ * Decoding as in Bike : use the Black-Gray-Flip (BGF) algorithm
+*/
 int
 Bike_decoding(fq_struct* res, const fq_struct* s, const fq_mat_t& H,
 	      const int weight, const int NbIter, const int tau,
 	      const fq_ctx_t ctx_q) {
+  
     int i, T, w;
     int r = fq_mat_nrows(H, ctx_q);
     int n = 2*r;
@@ -479,23 +482,45 @@ Bike_decoding(fq_struct* res, const fq_struct* s, const fq_mat_t& H,
 
     
     for (i = 0; i < NbIter; ++i) {
-	fq_mat_mul_vec(tmp, H, e, n, ctx_q);
+	printf("This is the %dth iteration !! \n", i);
+	fq_mat_mul_vec(tmp, H, e, n, ctx_q); /* CHANGE THIS : need polynomial
+						manipulation (?) */
 	_fq_vec_add(tmp, tmp, s, r, ctx_q);
 	w = hamming_weight(tmp, r, ctx_q);
-	T = compute_threshold(w, i);
+	T = compute_threshold(w, i, r);
+	printf("The threshold is %d\n", T);
+	
 	BFIter(e, black, gray, tmp , H, T, tau, ctx_q);
-	if (i==1) {
-	    BFMaskedIter(e, tmp, H, d, black, ctx_q);
+	
+	if (i==0) {
+	    BFMaskedIter(e, tmp, H, d, black, ctx_q); /* CHANGE THIS : change
+							 dependency on H */
 	    BFMaskedIter(e, tmp, H, d, gray, ctx_q);
 	}
-	for (int ii = 0; ii < n; ii++) {
-	    fq_print_pretty(&e[ii], ctx_q);
-	    printf(" ");
-	}
-	printf("\n");
+	
+	// for (int ii = 0; ii < n; ii++) {
+	//     fq_print_pretty(&e[ii], ctx_q);
+	//     printf(" ");
+	// }
+	// printf("\n");
     }
     
-    fq_mat_mul_vec(synd, H, e, n, ctx_q);
+    fq_mat_mul_vec(synd, H, e, n, ctx_q); /* computation of syndrome : remove H */
+
+/* printf("input syndrome: \n"); */
+    /* for (int ii = 0; ii < r; ii++) { */
+    /* 	fq_print_pretty(&s[ii], ctx_q); */
+    /* 	printf(" "); */
+    /* } */
+    /* printf("\n"); */
+
+    /* printf("retrieved syndrome: \n"); */
+    /* for (int ii = 0; ii < r; ii++) { */
+    /* 	fq_print_pretty(&synd[ii], ctx_q); */
+    /* 	printf(" "); */
+    /* } */
+    /* printf("\n"); */
+
     if (_fq_vec_equal(s, synd, r, ctx_q)) {
 	_fq_vec_set(res, e, n, ctx_q);
 	b = 1;
@@ -506,4 +531,106 @@ Bike_decoding(fq_struct* res, const fq_struct* s, const fq_mat_t& H,
 
     return b;
 }
- 
+
+
+/**
+ * Decoding as in Bike : use the Black-Gray-Flip (BGF) algorithm
+*/
+int
+Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
+		 const fq_poly_t h1, const int r, const int weight,
+		 const int NbIter, const int tau,
+		 const fq_ctx_t ctx_q) {
+    int i, T, w;
+    int n = 2*r;
+    int d = (weight + 1)/2 + 1;
+    int b = 0;
+    
+
+    int pos0[weight], pos1[weight];
+    fq_poly_nonzero_coeffs(pos0, h0, r, ctx_q);
+    fq_poly_nonzero_coeffs(pos1, h1, r, ctx_q);
+
+    
+    fq_poly_t P; fq_poly_init(P, ctx_q); fq_poly_set_cyclic(P, r, ctx_q);
+    
+    fq_poly_t e0; fq_poly_init(e0, ctx_q); fq_poly_zero(e0, ctx_q);
+    fq_poly_t e1; fq_poly_init(e1, ctx_q); fq_poly_zero(e1, ctx_q);
+    fq_poly_t tmp; fq_poly_init(tmp, ctx_q); fq_poly_zero(tmp, ctx_q);
+    fq_poly_t tmp2; fq_poly_init(tmp2, ctx_q); fq_poly_zero(tmp2, ctx_q);
+    fq_poly_t sp;  fq_poly_init(sp, ctx_q); fq_poly_zero(sp, ctx_q);
+    fq_poly_set_coeffs(sp, s, r, ctx_q);
+
+    
+    fq_poly_t synd; fq_poly_init(synd, ctx_q); fq_poly_zero(synd, ctx_q);
+    
+    int black[n]; int gray[n];
+    printf("h0 and h1 are equal: %d \n", fq_poly_equal(h0, h1, ctx_q));
+    
+    for (i = 0; i < NbIter; ++i) {
+	printf("This is the %dth iteration !! \n", i);
+
+	/* computes s' = s + e*h */
+	fq_poly_mulmod(tmp, e0, h0, P, ctx_q);
+	fq_poly_mulmod(tmp2, e1, h1, P, ctx_q);
+	fq_poly_add(tmp, tmp, tmp2, ctx_q);
+	fq_poly_add(tmp, tmp, sp, ctx_q);
+
+	/* hamming weight of s' + threshold */
+	w = fq_poly_hamming_weight(tmp, ctx_q);
+	T = compute_threshold(w, i, r);
+	printf("The hamming weight of sp is %d\n", w);
+	printf("The threshold is %d\n", T);
+
+	
+	BFIterv2(e0, e1, black, gray, tmp, pos0, pos1, weight, r, T, tau, ctx_q);
+	/* printf("The hamming weight of e0 is: %ld \n", fq_poly_hamming_weight(e0, ctx_q)); */
+	/* printf("The hamming weight of e1 is: %ld \n", fq_poly_hamming_weight(e1, ctx_q)); */
+
+	/* printf("e0 and e1 are equal: %d \n", fq_poly_equal(e0, e1, ctx_q)); */
+	
+	if (i==0) {
+	    BFMaskedIterv2(e0, e1, tmp, pos0, pos1, weight, r, d, black, ctx_q); 
+	    BFMaskedIterv2(e0, e1, tmp, pos0, pos1, weight, r, d, gray, ctx_q);
+	}
+	
+    }
+    
+    printf("e0 and e1 are equal: %d \n", fq_poly_equal(e0, e1, ctx_q));
+
+    /* fq_poly_print_pretty(e0, "x", ctx_q); */
+    /* fq_poly_print_pretty(e1, "x", ctx_q); */
+	
+    fq_poly_mulmod(tmp, e0, h0, P, ctx_q);
+    fq_poly_mulmod(tmp2, e1, h1, P, ctx_q);
+    fq_poly_add(synd, tmp, tmp2, ctx_q);
+
+    fq_struct* tmp0 = _fq_vec_init(r, ctx_q);
+    fq_struct* tmp1 = _fq_vec_init(r, ctx_q);
+
+    if (fq_poly_equal(sp, synd, ctx_q)) {
+	fq_poly_get_coeffs(tmp0, e0, r, ctx_q);
+	fq_poly_get_coeffs(tmp1, e1, r, ctx_q);
+	for (i = 0; i < n; ++i) {
+	    if (i < r) {
+		fq_set(&res[i], &tmp0[i], ctx_q);
+            } else {
+		fq_set(&res[i], &tmp1[i-r], ctx_q);
+            }
+        }
+	b = 1;
+    }
+
+    _fq_vec_clear(tmp0, r, ctx_q);
+    _fq_vec_clear(tmp1, r, ctx_q);
+    fq_poly_clear(e0, ctx_q);
+    fq_poly_clear(e1, ctx_q);
+    fq_poly_clear(tmp, ctx_q);
+    fq_poly_clear(tmp2, ctx_q);
+    fq_poly_clear(sp, ctx_q);
+    fq_poly_clear(P, ctx_q);
+    
+
+    return b;
+}
+

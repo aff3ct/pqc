@@ -55,9 +55,19 @@ int
 CM_syndrome_decoding_bin(fq_struct* res, const fq_struct* s, const fq_struct* alpha, const fq_poly_t g,
 			 const int len, const int t, const fq_ctx_t ctx);
 
-#endif // CODES_H
 
 int
 Bike_decoding(fq_struct* res, const fq_struct* s, const fq_mat_t& H,
 	      const int weight, const int NbIter, const int tau,
 	      const fq_ctx_t ctx_q);
+
+
+
+int
+Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
+		 const fq_poly_t h1, const int r, const int weight,
+		 const int NbIter, const int tau,
+		 const fq_ctx_t ctx_q);
+
+
+#endif // CODES_H

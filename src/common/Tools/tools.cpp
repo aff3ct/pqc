@@ -53,8 +53,9 @@ random_suitable_integer(const int len) {
  * TODO: find a better definition
  */
 int
-compute_threshold(const int w, const int dim) {
-    return std::max(0.005*w + 15, 42.);
+compute_threshold(const int w, const int ind, const int r) {
+    // return std::max(.2*w + 1.*r/2-7, 1.*r/2-5);
+    return std::max(0.0069722*w + 13.530, 36.);
 }
 
 
@@ -71,6 +72,16 @@ hamming_weight(const fq_struct* v, const int len, const fq_ctx_t ctx) {
     }
     return count;
 }
+
+/**
+ * Short: print a vector in Flint library
+ */
+void _fq_vec_print() {
+}
+
+
+
+
 
 /* **************************************************************************** */
 /*                      RANDOM INDICES / PERMUTATIONS                           */
@@ -232,18 +243,21 @@ fq_check_repeat(const fq_struct* a, const int len, const fq_ctx_t ctx) {
 
 /* generate a random vector whose coeffs are in a finite field and all distincts */
 void
-fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx, flint_rand_t state) {
+fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx,
+		     flint_rand_t state) {
     _fq_vec_randtest(res, state, len, ctx); /* NOT GOOD AT ALL → change it */
     while (fq_check_repeat(res, len, ctx)) {
 	_fq_vec_randtest(res, state, len, ctx);
     }
 }
 
+
 /* generate a random vector whose coeffs are in a finite field and all distincts
    WORK ONLY for *BINARY* fields
    NOT THE MOST ELEGANT WAY -- MAYBE CHANGE */
 void
-fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx, flint_rand_t state) {
+fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx,
+		       flint_rand_t state) {
     slong m = fq_ctx_degree(ctx);
     slong d = 1 << m;
     slong* inds = random_indices(d, state); /* here is the binary stuff */
@@ -262,13 +276,43 @@ fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx, flint_
 /*                           POLYNOMIAL MANIPUTATION                            */
 /* **************************************************************************** */
 
-
-
-/* set the coeffs of polynomial */
+/**
+ * Set the coeffs of polynomial
+ */
 void
-fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len, const fq_ctx_t ctx) {
+fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len,
+		   const fq_ctx_t ctx) {
     for (int i = 0; i < len; i++) {
 	fq_poly_set_coeff(f, i, &alpha[i], ctx);
+    }
+}
+
+/**
+ * Get the coefficients of a polynomial and store it in a vector.
+ */
+void
+fq_poly_get_coeffs(fq_struct* res, const fq_poly_t f, const int len, const fq_ctx_t ctx) {
+    for (int i = 0; i < len; i++) {
+	fq_poly_get_coeff(&res[i], f, i, ctx);
+    }
+}
+
+
+/**
+ * Compute the positions of non-zero coefficients.
+ * Assume pos has the good length.
+ */
+void
+fq_poly_nonzero_coeffs(int* pos, const fq_poly_t f, const int r,
+		       const fq_ctx_t ctx) {
+    int j = 0;
+    fq_t tmp; fq_init(tmp, ctx);
+    for (int i = 0; i < r; ++i) {
+	fq_poly_get_coeff(tmp, f, i, ctx);
+	if (fq_is_one(tmp, ctx)) {
+            pos[j] = i;
+	    j++;
+        }
     }
 }
 
@@ -285,7 +329,6 @@ fq_poly_set_cyclic(fq_poly_t res, const int d, const fq_ctx_t ctx) {
     fq_poly_set_coeff(res, 0, tmp, ctx);
     fq_clear(tmp, ctx);
 }
-
 
 
 /**
@@ -312,8 +355,8 @@ fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len,
  * i.e. s.t P(αᵢ) = βᵢ
  */
 void
-fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta, const int len,
-		    const fq_ctx_t ctx) {
+fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta,
+		    const int len, const fq_ctx_t ctx) {
     /* declare and initialise local variables */
     fq_poly_t A, B, tmp;
     fq_poly_init(A, ctx);
@@ -363,6 +406,7 @@ cm_fq_poly_irr_pol(fq_poly_t& res, const int deg, const fq_struct* alpha, const 
 	fq_poly_randtest_irreducible(res, state, deg+1, ctx);
     }
 }
+
 
 
 /**
@@ -431,11 +475,13 @@ xgcd_abort(fq_poly_t u, fq_poly_t v, fq_poly_t d, const fq_poly_t a, const fq_po
 /*                                 MATRICES                                     */
 /* **************************************************************************** */
 
-/* Expansion of a matrix over F_q^m to a matrix over FF_q
+/**
+ * Expansion of a matrix over F_q^m to a matrix over FF_q
  * NEED TO OBTAIN OUTPUT AS A MATRIX IN FF_q
  */
 void
 fq_matrix_expand(fq_mat_t res, const fq_mat_t H, const fq_ctx_t ctx, const fq_ctx_t ctx_q) {
+    
     int m = fq_ctx_degree(ctx);
     int nr, nc, tmp;
     fq_t tmp_q;
@@ -474,16 +520,42 @@ ctr(const fq_struct* v, const fq_mat_t& H,  const int j, const fq_ctx_t ctx) {
     int count = 0;
     
     int r = fq_mat_nrows(H, ctx);
-    
+
+    /* fq_equal(&v[i], fq_mat_entry(H, i, j), ctx)  */
     for (int i = 0; i < r; ++i) {
-	if (fq_equal(&v[i], fq_mat_entry(H, i, j), ctx)) {
+	if (fq_is_one(&v[i], ctx) && fq_is_one(fq_mat_entry(H, i, j), ctx)) {
 	    count++;
 	}
     }
-
+    printf("count is: %d and r is %d \n", count, r);
     return count;
 }
 
+
+/** 
+ * Counter function as in Bike documentation.
+ * Computes the number of agreeing bits in vector v and jth column vector of H.
+ */
+int
+ctrv2(const fq_poly_t sp,  const int* pos, const int j, const int weight, const int r,
+      const fq_ctx_t ctx) {
+
+    int count = 0;
+    int k = 0;
+    fq_t tmp; fq_init(tmp, ctx);
+    
+    for (int i = 0; i < weight; ++i) {
+	k = (j + pos[i]) % r ;
+	/* printf("%d ", k); */
+	fq_poly_get_coeff(tmp, sp, k, ctx);
+	if (fq_is_one(tmp, ctx)) {
+	    count++;
+	}
+    }
+    /* printf("\n"); */
+    fq_clear(tmp, ctx);
+    return count;
+}
 
 
 /**
@@ -492,11 +564,11 @@ ctr(const fq_struct* v, const fq_mat_t& H,  const int j, const fq_ctx_t ctx) {
 void
 BFIter(fq_struct* e, int* black, int* gray, const fq_struct* s,
        const fq_mat_t& H, const int T, const int tau, const fq_ctx_t ctx) {
-    int i, j;
+    int i, j, count;
 
     int n = fq_mat_ncols(H, ctx);
 
-    fq_t one;     fq_init(one, ctx); fq_set_ui(one, 1, ctx);
+    fq_t one;  fq_init(one, ctx); fq_set_ui(one, 1, ctx);
     
     /* initialisation black and gray vectors */
     for (i = 0; i < n; ++i) {
@@ -505,14 +577,66 @@ BFIter(fq_struct* e, int* black, int* gray, const fq_struct* s,
     }
 
     for (j = 0; j < n; ++j) {
-	if (ctr(s, H, j, ctx) >= T) {
+	count = ctr(s, H, j, ctx);
+	if (count >= T) {
 	    fq_add(&e[j], &e[j], one, ctx);
 	    black[j] = 1;
-	} else if (ctr(s, H, j, ctx) >= T - tau) {
+	} else if (count >= T - tau) {
 	    gray[j] = 1;
 	}
     }
     fq_clear(one, ctx);
+}
+
+
+/**
+ * Computes black and gray positions as in Bike specification doc.
+ */
+void
+BFIterv2(fq_poly_t e0, fq_poly_t e1, int* black, int* gray, const fq_poly_t sp,
+	 const int* pos0, const int* pos1, const int weight, const int r, const int T,
+	 const int tau, const fq_ctx_t ctx) {
+    
+    int i, j, count;
+
+    int n = 2*r;
+    
+    fq_t one;  fq_init(one, ctx); fq_set_ui(one, 1, ctx);
+    fq_t tmp; fq_init(tmp, ctx);
+    
+    /* initialisation black and gray vectors */
+    for (i = 0; i < n; ++i) {
+	black[i] = 0;
+	gray[i] = 0;
+    }
+    
+    for (j = 0; j < n; ++j) {
+        if (j < r) {
+            count = ctrv2(sp, pos0, j, weight, r, ctx);
+	} else {
+	    count = ctrv2(sp, pos1, j - r, weight, r, ctx);
+	}
+	/* printf("count is: %d and threshold is %d \n", count, T); */
+        if (count >= T) {
+	    printf("count is %d and threshold is %d \n", count, T);
+	    if (j < r) {
+		fq_poly_get_coeff(tmp, e0, j, ctx);
+		fq_add(tmp, tmp, one, ctx);
+		fq_poly_set_coeff(e0, j, tmp, ctx);
+	    } else {
+		fq_poly_get_coeff(tmp, e1, j - r, ctx);
+		fq_add(tmp, tmp, one, ctx);
+		fq_poly_set_coeff(e1, j-r, tmp, ctx);
+	    }
+	    
+	    black[j] = 1;
+	} else if (count >= T - tau) {
+	    printf("count is %d and threshold is %d \n", count, T);
+	    gray[j] = 1;
+	}
+    }
+    fq_clear(one, ctx);
+    fq_clear(tmp, ctx);
 }
 
 
@@ -540,6 +664,50 @@ BFMaskedIter(fq_struct* e, const fq_struct* s, const fq_mat_t& H, const int T,
 
 
 /**
+ * Modify e using black or gray positions as in Bike specification doc.
+ */
+void
+BFMaskedIterv2(fq_poly_t e0, fq_poly_t e1, const fq_poly_t sp, const int* pos0,
+	       const int* pos1, const int weight, const int r, const int T,
+	       const int* mask, const fq_ctx_t ctx) {
+    int j, count;
+
+    int n = 2*r;    
+
+    fq_t tmp, tmp1;
+    fq_init(tmp, ctx); fq_init(tmp1, ctx);
+    
+    for (j = 0; j < n; ++j) {
+	if (j < r) {
+            count = ctrv2(sp, pos0, j, weight, r, ctx);
+        } else {
+	    count = ctrv2(sp, pos1, j - r, weight, r, ctx);
+        }
+
+	// printf("count is %d and threshold is %d \n", count, T);
+	
+	if (count >= T) {
+	    fq_set_ui(tmp, mask[j], ctx);
+
+	    if (j < r) {
+		fq_poly_get_coeff(tmp1, e0, j, ctx);
+		fq_add(tmp1, tmp1, tmp, ctx);
+		fq_poly_set_coeff(e0, j, tmp1, ctx);
+	    } else {
+		fq_poly_get_coeff(tmp1, e1, j - r, ctx);
+		fq_add(tmp1, tmp1, tmp, ctx);
+		fq_poly_set_coeff(e1, j-r, tmp1, ctx);
+	    }
+
+	} 
+    }
+    fq_clear(tmp, ctx);
+    fq_clear(tmp1, ctx);
+}
+
+
+
+/**
  * Computes multiplication matrix of h in FF_q[X] / (P(X))
  */
 void
@@ -551,6 +719,7 @@ fq_mult_matrix(fq_mat_t res, const fq_poly_t h, const fq_poly_t P, const fq_ctx_
     fq_poly_set(tmp_pol, h, ctx);   fq_poly_gen(gen, ctx);
     
     for (i = 0; i < d; ++i) {
+	// printf("it is the %dth index in mult mat comp. \t ", i);
 	for (j = 0; j < d; ++j) {
 	    fq_poly_get_coeff(tmp, tmp_pol, j, ctx);
 	    fq_mat_entry_set(res, i, j, tmp, ctx);

@@ -7,7 +7,6 @@
 #include <vector>
 #include <streampu.hpp>
 
-
 #include <flint/flint.h>
 #include <flint/fmpz.h>		/* large integers */
 #include <flint/fq.h>		/* finite fields */
@@ -84,14 +83,19 @@ int main(int argc, char** argv, char** env) {
     /* ************************************************************************* */
 
     /* !! needs r such that 2 is primitive mod r !!  */
-
-    int r = random_suitable_integer(9);
+    /* int r = random_suitable_integer(6); */
+    int r = 12323;
     
-    
-    // int r = 101;
     int len = 2*r;
     int n = len;
-    int weight = 10;
+
+    /* int weight = 10; */
+    int weight = 142;
+    /* int error_weight = 7; */
+    int error_weight = 134;
+
+    int NbIter = 5;
+    int tau = 3;
     
     
     Bike_secret_key SK = Bike_secret_key(r, &ctx_q);
@@ -99,29 +103,43 @@ int main(int argc, char** argv, char** env) {
         
     Bike_keygen_naive(SK, PK, weight);
     
-    fq_mat_t H0, H1;
-    fq_mat_init(H0, r, r, ctx_q);
-    fq_mat_init(H1, r, r, ctx_q);
-    fq_poly_t P;
-    fq_poly_init(P, ctx_q);
-    fq_poly_set_cyclic(P, r, ctx_q);
+    printf("Keygen done !\n");
+    
+    fq_poly_print_pretty(SK.h0, "x", ctx_q);
+    printf("\n");
+    printf("The hamming weight of h0 is: %ld \n", fq_poly_hamming_weight(SK.h0, ctx_q));
+    printf("\n");
+    fq_poly_print_pretty(SK.h1, "x", ctx_q);
+    printf("\n");
+    printf("The hamming weight of h1 is: %ld \n", fq_poly_hamming_weight(SK.h1, ctx_q));
+    printf("\n");
+	
+    // fq_mat_t H0, H1;
+    // fq_mat_init(H0, r, r, ctx_q);
+    // fq_mat_init(H1, r, r, ctx_q);
+    // fq_poly_t P;
+    // fq_poly_init(P, ctx_q);
+    // fq_poly_set_cyclic(P, r, ctx_q);
+    // printf("cyclic pol computed !\n");
 
+    // fq_mult_matrix(H0, SK.h0, P, ctx_q);
+    // fq_mult_matrix(H1, SK.h1, P, ctx_q);
+    // printf("mult matrix computed !\n");
+    // // fq_mat_print_pretty(H0, ctx_q);
 
-    fq_mult_matrix(H0, SK.h0, P, ctx_q);
-    fq_mult_matrix(H1, SK.h1, P, ctx_q);
+    // fq_mat_t H;
+    // fq_mat_init(H, r, n, ctx_q);
+    // printf("Parity-check matrix initialised !\n");
+    // fq_mat_concat_horizontal(H, H0, H1, ctx_q);
+    // // // fq_mat_print_pretty(H, ctx_q);
+    // printf("Parity-check matrix computed !\n");
 
-    fq_mat_print_pretty(H0, ctx_q);
-
-    fq_mat_t H;
-    fq_mat_init(H, r, n, ctx_q);
-    fq_mat_concat_horizontal(H, H0, H1, ctx_q);
-    fq_mat_print_pretty(H, ctx_q);
-
+    
     int e[n];
     for (int i = 0; i < n; ++i) {
 	e[i] = 0;
     }
-    bike_gen_e(e, n, weight);
+    bike_gen_e(e, n, error_weight);
 
     fq_struct* ee = _fq_vec_init(n, ctx_q);
     _int_vec_2_fq(ee, e, n, ctx_q);
@@ -142,28 +160,33 @@ int main(int argc, char** argv, char** env) {
     for (int k = 0; k < r; k++) {
 	fq_poly_get_coeff(&ss[k], sp, k, ctx_q);
     }
-    
-    
+
     fq_struct* res = _fq_vec_init(n, ctx_q);
     
     // fq_mat_mul_vec(s, H, ee, n, ctx_q);
 
-    int b = Bike_decoding(res, ss, H, weight, 5, 3, ctx_q);
+    // int b = Bike_decoding(res, ss, H, weight, 5, 3, ctx_q);
 
-    printf("%d \n", b);
+    int b = Bike_decoding_v2(res, ss, SK.h0, SK.h1, r, weight/2, NbIter, tau, ctx_q);
+    
+    printf("successful decoding ?:  %d \n", b);
 
-    
-    _fq_vec_print(res, n, ctx_q);
-    printf("\n");
 
-    for (int ii = 0; ii < n; ii++) {
-	fq_print_pretty(&ee[ii], ctx_q);
-	    printf(" ");
-    }
-    printf("\n");
-    // _fq_vec_print(ee, n, ctx_q);
+    // for (int ii = 0; ii < n; ii++) {
+    // 	fq_print_pretty(&res[ii], ctx_q);
+    // 	printf(" ");
+    // }
+    // // _fq_vec_print(res, n, ctx_q);
+    // printf("\n");
     
+    // for (int ii = 0; ii < n; ii++) {
+    // 	fq_print_pretty(&ee[ii], ctx_q);
+    // 	printf(" ");
+    // }
+    // printf("\n");
+    // // _fq_vec_print(ee, n, ctx_q);
     
+    // printf("Dimension is %d \n", r);
     
     // const int FRAME_SIZE = len;
     // const int WEIGHT = weight;
@@ -217,7 +240,7 @@ int main(int argc, char** argv, char** env) {
     
     /* ************************************************************************* */       
     /* ************************************************************************* */
-
+    
 
     
     
