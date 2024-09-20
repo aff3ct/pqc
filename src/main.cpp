@@ -43,14 +43,13 @@
 #include "Modules/CM_RandomFixedWeight/CM_RandomFixedWeight.hpp"
 #include "Modules/Bike_RandomFixedWeight/Bike_RandomFixedWeight.hpp"
 #include "Modules/CM_Encoder/CM_Encoder.hpp"
-#include "Modules/Bike_Encoder/Bike_Encoder.hpp"
 #include "Modules/CM_Decoder/CM_Decoder.hpp"
-
+#include "Modules/Bike_Encoder/Bike_Encoder.hpp"
+#include "Modules/Bike_Decoder/Bike_Decoder.hpp"
 
 
 using namespace spu;
 using namespace spu::module;
-
 using namespace std;
 
 // #define VERIF_START_TIME 7
@@ -97,163 +96,109 @@ int main(int argc, char** argv, char** env) {
     int NbIter = 5;
     int tau = 3;
     
+
+    const int FRAME_SIZE = len;
+    const int SYND_SIZE = r;
+    const int WEIGHT = weight;
+    const int ERROR_WEIGHT = error_weight;
+    const int NBITER = NbIter;
+    const int TAU = tau;
+
     
-    Bike_secret_key SK = Bike_secret_key(r, &ctx_q);
-    Bike_public_key PK = Bike_public_key(r, &ctx_q);
-        
+    Bike_secret_key SK = Bike_secret_key(SYND_SIZE, &ctx_q);
+    Bike_public_key PK = Bike_public_key(SYND_SIZE, &ctx_q);
     Bike_keygen_naive(SK, PK, weight);
-    
-    printf("Keygen done !\n");
-    
-	
-    // fq_mat_t H0, H1;
-    // fq_mat_init(H0, r, r, ctx_q);
-    // fq_mat_init(H1, r, r, ctx_q);
-    // fq_poly_t P;
-    // fq_poly_init(P, ctx_q);
-    // fq_poly_set_cyclic(P, r, ctx_q);
-    // printf("cyclic pol computed !\n");
-
-    // fq_mult_matrix(H0, SK.h0, P, ctx_q);
-    // fq_mult_matrix(H1, SK.h1, P, ctx_q);
-    // printf("mult matrix computed !\n");
-    // // fq_mat_print_pretty(H0, ctx_q);
-
-    // fq_mat_t H;
-    // fq_mat_init(H, r, n, ctx_q);
-    // printf("Parity-check matrix initialised !\n");
-    // fq_mat_concat_horizontal(H, H0, H1, ctx_q);
-    // // // fq_mat_print_pretty(H, ctx_q);
-    // printf("Parity-check matrix computed !\n");
 
     
-    int e[n];
-    for (int i = 0; i < n; ++i) {
-	e[i] = 0;
-    }
-    bike_gen_e(e, n, error_weight);
-
-    fq_struct* ee = _fq_vec_init(n, ctx_q);
-    _int_vec_2_fq(ee, e, n, ctx_q);
-
-
-    fq_poly_t e0; fq_poly_init(e0, ctx_q); fq_poly_zero(e0, ctx_q);
-    fq_poly_t e1; fq_poly_init(e1, ctx_q); fq_poly_zero(e1, ctx_q);
-
-    for (int i = 0; i < n; ++i) {
-        if (i < r) {
-	    fq_poly_set_coeff(e0, i, &ee[i], ctx_q);
-        } else {
-	    fq_poly_set_coeff(e1, i - r, &ee[i], ctx_q);
-        }
-    }
-
-    fq_poly_t P; fq_poly_init(P, ctx_q); fq_poly_set_cyclic(P, r, ctx_q);
-    fq_struct* s = _fq_vec_init(r, ctx_q);
-
-    fq_poly_t sp; fq_poly_init(sp, ctx_q);
-
-    /* fq_poly_t sp1; fq_poly_init(sp1, ctx_q); */
-    /* fq_poly_mulmod(sp, e0, SK.h0, P, ctx_q); */
-    /* fq_poly_mulmod(sp1, e1, SK.h1, P, ctx_q); */
-    /* fq_poly_add(sp, sp, sp1, ctx_q); */
+    module::Initializer   <int> initializer(FRAME_SIZE);
+    module::Incrementer   <int> incr1(FRAME_SIZE);
+    module::Finalizer     <int> finalizer(FRAME_SIZE);
     
-    /* !!!  encoding and transformation does not seem to work !!! */
-    fq_poly_zero(sp, ctx_q);
-    Bike_encoding(sp, e, PK.h,  r, ctx_q);
-    /* // fq_poly_set_coeffs(sp, s, r, ctx_q); */
-    fq_poly_mulmod(sp, sp, SK.h0, P, ctx_q);
-
+    module::Comparator comp(FRAME_SIZE);
+    module::Bike_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT);
+    module::Bike_Encoder bike_encode(PK);
+    module::Bike_Decoder bike_decode(WEIGHT, NBITER, TAU, SK);
 
     
-    fq_struct* ss = _fq_vec_init(r, ctx_q);
-
-    
-
-    for (int k = 0; k < r; k++) {
-	fq_poly_get_coeff(&ss[k], sp, k, ctx_q);
-    }
-    
-    
-    fq_struct* res = _fq_vec_init(n, ctx_q);
-    
-    // fq_mat_mul_vec(s, H, ee, n, ctx_q);
-
-    // int b = Bike_decoding(res, ss, H, weight, 5, 3, ctx_q);
-
-    int b = Bike_decoding_v2(res, ss, SK.h0, SK.h1, r, weight/2, NbIter, tau, ctx_q);
-    
-    printf("successful decoding ?:  %d \n", b);
+    initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"];
+    randfixed   ["random_fixed_weight::output" ] = bike_encode   ["bike_encoder::input"];
+    bike_encode ["bike_encoder::output"] = bike_decode ["bike_decoder::input"];
+    bike_decode ["bike_decoder::output"] = comp ["compare::input1"];
+    randfixed   ["random_fixed_weight::output" ]= comp ["compare::input2"];
+    comp ["compare::output"] = finalizer ["finalize::in"  ];
 
 
-    printf("the vectors are equal:   %d \n", _fq_vec_equal(res, ee, n, ctx_q));
-    
-    // for (int ii = 0; ii < n; ii++) {
-	// fq_print_pretty(&res[ii], ctx_q);
-	// printf(" ");
-	// fq_print_pretty(&ee[ii], ctx_q);
-	// printf("\n");
-    // }
-    // _fq_vec_print(res, n, ctx_q);
-    // printf("\n");
-    
-    // for (int ii = 0; ii < n; ii++) {
-    // 	fq_print_pretty(&ee[ii], ctx_q);
-    // 	printf(" ");
-    // }
-    // printf("\n");
-    // _fq_vec_print(ee, n, ctx_q);
-    
-    // printf("Dimension is %d \n", r);
-    
-    // const int FRAME_SIZE = len;
-    // const int WEIGHT = weight;
+    std::vector<runtime::Task*> first = {&initializer("initialize")};
 
-    // module::Initializer   <int> initializer(FRAME_SIZE);
-    // module::Incrementer   <int> incr1(FRAME_SIZE);
-    // module::Finalizer     <int> finalizer(r);
+    runtime::Sequence seq(first);
 
-    // module::Bike_RandomFixedWeight randfixed(FRAME_SIZE, WEIGHT);
-    // module::Bike_Encoder bike_encode(PK);
+    std::ofstream file("graph.dot");
+    seq.export_dot(file);
 
+    for (auto lt : seq.get_tasks_per_types())
+        for (auto t : lt)
+	    {
+		t->set_stats(true);
+		t->set_debug(true);
+	    }
 
-        
-    // initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"];
-    // randfixed   ["random_fixed_weight::output" ] = bike_encode   ["bike_encoder::input"];
-    // bike_encode ["bike_encoder::output"] = finalizer ["finalize::in"  ];
-
-
-    // // randfixed   ["random_fixed_weight::output" ] = comp ["compare::input1" ];
-    // // cm_decode ["cm_decoder::output"] = comp ["compare::input2" ];
-    // // cm_encode ["cm_encoder::output"] = comp ["compare::input3" ];
-
-    // // comp ["compare::output"] = finalizer ["finalize::in"];
-    
-    // // randfixed["random_fixed_weight::output"] = finalizer ["finalize::in"  ];
-
-
-    
-    // // // incr1       ["increment::out" ]   = comp_fpga            ["compare::input1"];
-    // // // serial      ["write::output"   ]   = comp_fpga            ["compare::input2"];
-    // // // comp_fpga   ["compare::output"  ] = finalizer_hw        ["finalize::in"];
-
-    // std::vector<runtime::Task*> first = {&initializer("initialize")};
-
-    // runtime::Sequence seq(first);
-
-    // std::ofstream file("graph.dot");
-    // seq.export_dot(file);
-
-    // for (auto lt : seq.get_tasks_per_types())
-    //     for (auto t : lt)
-    // 	    {
-    // 		t->set_stats(true);
-    // 		t->set_debug(true);
-    // 	    }
-
+    seq.exec_seq();
     // seq.exec_seq();
-    // // seq.exec_seq();
 
+
+
+    
+    /* printf("Keygen done !\n"); */
+    
+    /* int e[n]; */
+    /* for (int i = 0; i < n; ++i) { */
+    /* 	e[i] = 0; */
+    /* } */
+    /* bike_gen_e(e, n, error_weight); */
+
+    /* fq_struct* ee = _fq_vec_init(n, ctx_q); */
+    /* _int_vec_2_fq(ee, e, n, ctx_q); */
+
+
+    /* fq_poly_t e0; fq_poly_init(e0, ctx_q); fq_poly_zero(e0, ctx_q); */
+    /* fq_poly_t e1; fq_poly_init(e1, ctx_q); fq_poly_zero(e1, ctx_q); */
+
+    /* for (int i = 0; i < n; ++i) { */
+    /*     if (i < r) { */
+    /* 	    fq_poly_set_coeff(e0, i, &ee[i], ctx_q); */
+    /*     } else { */
+    /* 	    fq_poly_set_coeff(e1, i - r, &ee[i], ctx_q); */
+    /*     } */
+    /* } */
+
+    /* fq_poly_t P; fq_poly_init(P, ctx_q); fq_poly_set_cyclic(P, r, ctx_q); */
+    /* fq_struct* s = _fq_vec_init(r, ctx_q); */
+
+    /* fq_poly_t sp; fq_poly_init(sp, ctx_q); */
+
+    /* /\* !!!  encoding and transformation does not seem to work !!! *\/ */
+    /* fq_poly_zero(sp, ctx_q); */
+    /* Bike_encoding(sp, e, PK.h,  r, ctx_q); */
+    /* fq_poly_mulmod(sp, sp, SK.h0, P, ctx_q); */
+
+    /* fq_struct* ss = _fq_vec_init(r, ctx_q); */
+
+    /* for (int k = 0; k < r; k++) { */
+    /* 	fq_poly_get_coeff(&ss[k], sp, k, ctx_q); */
+    /* } */
+    
+    /* fq_struct* res = _fq_vec_init(n, ctx_q); */
+    
+    /* int b = Bike_decoding_v2(res, ss, SK.h0, SK.h1, r, weight/2, NbIter, tau, ctx_q); */
+    
+    /* printf("successful decoding ?:  %d \n", b); */
+
+
+    /* printf("the vectors are equal:   %d \n", _fq_vec_equal(res, ee, n, ctx_q)); */
+    
+    
+    
+    
 
     
     /* ************************************************************************* */       

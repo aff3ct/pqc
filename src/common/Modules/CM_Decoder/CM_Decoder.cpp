@@ -52,7 +52,6 @@ CM_Decoder:: cm_decoder(int* input, int* output, const CM_secret_key& SK, const 
     int b = CM_syndrome_decoding_bin(tmp_e, tmp_s, SK.get_alpha(), SK.g, this->frame_size, this->weight,
 				 *ctx);
     
-    // CM_encoding(tmp_s, tmp_e, PK.T, this->frame_size, *ctx_q);
 
     for(auto i = 0; i < this->synd_size; i++)
 	{

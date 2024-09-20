@@ -507,20 +507,6 @@ Bike_decoding(fq_struct* res, const fq_struct* s, const fq_mat_t& H,
     
     fq_mat_mul_vec(synd, H, e, n, ctx_q); /* computation of syndrome : remove H */
 
-/* printf("input syndrome: \n"); */
-    /* for (int ii = 0; ii < r; ii++) { */
-    /* 	fq_print_pretty(&s[ii], ctx_q); */
-    /* 	printf(" "); */
-    /* } */
-    /* printf("\n"); */
-
-    /* printf("retrieved syndrome: \n"); */
-    /* for (int ii = 0; ii < r; ii++) { */
-    /* 	fq_print_pretty(&synd[ii], ctx_q); */
-    /* 	printf(" "); */
-    /* } */
-    /* printf("\n"); */
-
     if (_fq_vec_equal(s, synd, r, ctx_q)) {
 	_fq_vec_set(res, e, n, ctx_q);
 	b = 1;
@@ -534,7 +520,8 @@ Bike_decoding(fq_struct* res, const fq_struct* s, const fq_mat_t& H,
 
 
 /**
- * Decoding as in Bike : use the Black-Gray-Flip (BGF) algorithm
+ * Decoding as in Bike : use the Black-Gray-Flip (BGF) algorithm.
+ * Comment : we use a polynomial representation as we should.
 */
 int
 Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
@@ -545,15 +532,16 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
     int n = 2*r;
     int d = (weight + 1)/2 + 1;
     int b = 0;
-    
 
+    /* P = X^r - 1 */
+    fq_poly_t P; fq_poly_init(P, ctx_q); fq_poly_set_cyclic(P, r, ctx_q);
+    
+    /* position of non-zero coefficients of h0, h1 (secret key) */
     int pos0[weight], pos1[weight];
     fq_poly_nonzero_coeffs(pos0, h0, r, ctx_q);
     fq_poly_nonzero_coeffs(pos1, h1, r, ctx_q);
 
-    
-    fq_poly_t P; fq_poly_init(P, ctx_q); fq_poly_set_cyclic(P, r, ctx_q);
-    
+    /* polynomials used in computation */
     fq_poly_t e0; fq_poly_init(e0, ctx_q); fq_poly_zero(e0, ctx_q);
     fq_poly_t e1; fq_poly_init(e1, ctx_q); fq_poly_zero(e1, ctx_q);
     fq_poly_t tmp; fq_poly_init(tmp, ctx_q); fq_poly_zero(tmp, ctx_q);
@@ -565,29 +553,22 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
     fq_poly_t synd; fq_poly_init(synd, ctx_q); fq_poly_zero(synd, ctx_q);
     
     int black[n]; int gray[n];
-    printf("h0 and h1 are equal: %d \n", fq_poly_equal(h0, h1, ctx_q));
     
     for (i = 0; i < NbIter; ++i) {
-	printf("This is the %dth iteration !! \n", i);
-
-	/* computes s' = s + e*h */
+       	
+	/* Computes s' = s + e*h */
 	fq_poly_mulmod(tmp, e0, h0, P, ctx_q);
 	fq_poly_mulmod(tmp2, e1, h1, P, ctx_q);
 	fq_poly_add(tmp, tmp, tmp2, ctx_q);
 	fq_poly_add(tmp, tmp, sp, ctx_q);
 	
-	/* hamming weight of s' + threshold */
+	/* Hamming weight of s' + threshold */
 	w = fq_poly_hamming_weight(tmp, ctx_q);
 	T = compute_threshold(w, i, r);
-	printf("The hamming weight of sp is %d\n", w);
-	printf("The threshold is %d\n", T);
-
 	
+	/* BFIter with polynomials */
 	BFIterv2(e0, e1, black, gray, tmp, pos0, pos1, weight, r, T, tau, ctx_q);
-	/* printf("The hamming weight of e0 is: %ld \n", fq_poly_hamming_weight(e0, ctx_q)); */
-	/* printf("The hamming weight of e1 is: %ld \n", fq_poly_hamming_weight(e1, ctx_q)); */
 
-	/* printf("e0 and e1 are equal: %d \n", fq_poly_equal(e0, e1, ctx_q)); */
 	
 	if (i==0) {
 	    BFMaskedIterv2(e0, e1, tmp, pos0, pos1, weight, r, d, black, ctx_q); 
@@ -595,12 +576,8 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
 	}
 	
     }
-    
-    printf("e0 and e1 are equal: %d \n", fq_poly_equal(e0, e1, ctx_q));
 
-    /* fq_poly_print_pretty(e0, "x", ctx_q); */
-    /* fq_poly_print_pretty(e1, "x", ctx_q); */
-	
+    /* Computes the syndrome */
     fq_poly_mulmod(tmp, e0, h0, P, ctx_q);
     fq_poly_mulmod(tmp2, e1, h1, P, ctx_q);
     fq_poly_add(synd, tmp, tmp2, ctx_q);
@@ -609,7 +586,6 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
     fq_struct* tmp1 = _fq_vec_init(r, ctx_q);
 
     if (fq_poly_equal(sp, synd, ctx_q)) {
-	fq_poly_print_pretty(sp, "x", ctx_q);
 	fq_poly_get_coeffs(tmp0, e0, r, ctx_q);
 	fq_poly_get_coeffs(tmp1, e1, r, ctx_q);
 	for (i = 0; i < n; ++i) {
@@ -622,6 +598,7 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
 	b = 1;
     }
 
+    
     _fq_vec_clear(tmp0, r, ctx_q);
     _fq_vec_clear(tmp1, r, ctx_q);
     fq_poly_clear(e0, ctx_q);
@@ -631,7 +608,6 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
     fq_poly_clear(sp, ctx_q);
     fq_poly_clear(P, ctx_q);
     
-
     return b;
 }
 

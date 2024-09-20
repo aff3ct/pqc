@@ -17,17 +17,14 @@ Bike_Encoder:: Bike_Encoder(Bike_public_key& PK) :
     auto input   = create_socket_in<int>(t, "input", frame_size);
     auto output  = create_socket_out<int>(t, "output", output_size);
 
-
-    
     this->create_codelet(t, [input, output, &PK](Module &m, runtime::Task &t,
-						const size_t frame_id) -> int {
+						 const size_t frame_id) -> int {
 	static_cast<Bike_Encoder&>(m).bike_encoder(static_cast<int*>(t[input].get_dataptr()),
-					       static_cast<int*>(t[output].get_dataptr()),
-					       static_cast<Bike_public_key&>(PK),
-					       frame_id);
+						   static_cast<int*>(t[output].get_dataptr()),
+						   static_cast<Bike_public_key&>(PK),
+						   frame_id);
 	return 0;
     }			 	);
-
 }
 
 
@@ -36,7 +33,8 @@ Bike_Encoder:: ~Bike_Encoder() {
 
 
 void
-Bike_Encoder:: bike_encoder(int* input, int* output, const Bike_public_key& PK, const int frame_id) {
+Bike_Encoder:: bike_encoder(int* input, int* output, const Bike_public_key& PK,
+			    const int frame_id) {
     fq_ctx_t* ctx_q = PK.get_ctx_q(); /* finite field F_2 */
 
     fq_t tmp; fq_init(tmp, *ctx_q);

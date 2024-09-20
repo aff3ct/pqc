@@ -628,10 +628,8 @@ BFIterv2(fq_poly_t e0, fq_poly_t e1, int* black, int* gray, const fq_poly_t sp,
 		fq_add(tmp, tmp, one, ctx);
 		fq_poly_set_coeff(e1, j-r, tmp, ctx);
 	    }
-	    
 	    black[j] = 1;
 	} else if (count >= T - tau) {
-	    printf("count is %d and threshold is %d \n", count, T);
 	    gray[j] = 1;
 	}
     }
@@ -683,8 +681,6 @@ BFMaskedIterv2(fq_poly_t e0, fq_poly_t e1, const fq_poly_t sp, const int* pos0,
         } else {
 	    count = ctrv2(sp, pos1, j - r, weight, r, ctx);
         }
-
-	// printf("count is %d and threshold is %d \n", count, T);
 	
 	if (count >= T) {
 	    fq_set_ui(tmp, mask[j], ctx);
