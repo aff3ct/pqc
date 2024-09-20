@@ -105,14 +105,6 @@ int main(int argc, char** argv, char** env) {
     
     printf("Keygen done !\n");
     
-    fq_poly_print_pretty(SK.h0, "x", ctx_q);
-    printf("\n");
-    printf("The hamming weight of h0 is: %ld \n", fq_poly_hamming_weight(SK.h0, ctx_q));
-    printf("\n");
-    fq_poly_print_pretty(SK.h1, "x", ctx_q);
-    printf("\n");
-    printf("The hamming weight of h1 is: %ld \n", fq_poly_hamming_weight(SK.h1, ctx_q));
-    printf("\n");
 	
     // fq_mat_t H0, H1;
     // fq_mat_init(H0, r, r, ctx_q);
@@ -143,24 +135,41 @@ int main(int argc, char** argv, char** env) {
 
     fq_struct* ee = _fq_vec_init(n, ctx_q);
     _int_vec_2_fq(ee, e, n, ctx_q);
-    
 
+
+    fq_poly_t e0; fq_poly_init(e0, ctx_q); fq_poly_zero(e0, ctx_q);
+    fq_poly_t e1; fq_poly_init(e1, ctx_q); fq_poly_zero(e1, ctx_q);
+
+    for (int i = 0; i < n; ++i) {
+        if (i < r) {
+	    fq_poly_set_coeff(e0, i, &ee[i], ctx_q);
+        } else {
+	    fq_poly_set_coeff(e1, i - r, &ee[i], ctx_q);
+        }
+    }
+
+    fq_poly_t P; fq_poly_init(P, ctx_q); fq_poly_set_cyclic(P, r, ctx_q);
     fq_struct* s = _fq_vec_init(r, ctx_q);
-    fq_poly_t sp; fq_poly_init(sp, ctx_q);
-    fq_poly_zero(sp, ctx_q);
+    fq_poly_t sp; fq_poly_init(sp, ctx_q); fq_poly_t sp1; fq_poly_init(sp1, ctx_q);
+    fq_poly_mulmod(sp, e0, SK.h0, P, ctx_q);
+    fq_poly_mulmod(sp1, e1, SK.h1, P, ctx_q);
+    fq_poly_add(sp, sp, sp1, ctx_q);
     
-    Bike_encoding(sp, e, PK.h,  r, ctx_q);
+    /* !!!  encoding and transformation does not seem to work !!! */
+    /* fq_poly_zero(sp, ctx_q); */
+    /* Bike_encoding(sp, e, PK.h,  r, ctx_q); */
+    // // fq_poly_set_coeffs(sp, s, r, ctx_q);
+    // fq_poly_mul(sp, sp, SK.h0, ctx_q);
 
     fq_struct* ss = _fq_vec_init(r, ctx_q);
 
     
-    // fq_poly_set_coeffs(sp, s, r, ctx_q);
 
-    fq_poly_mul(sp, sp, SK.h0, ctx_q);
     for (int k = 0; k < r; k++) {
 	fq_poly_get_coeff(&ss[k], sp, k, ctx_q);
     }
-
+    
+    
     fq_struct* res = _fq_vec_init(n, ctx_q);
     
     // fq_mat_mul_vec(s, H, ee, n, ctx_q);
@@ -172,11 +181,15 @@ int main(int argc, char** argv, char** env) {
     printf("successful decoding ?:  %d \n", b);
 
 
+    printf("the vectors are equal:   %d \n", _fq_vec_equal(res, ee, n, ctx_q));
+    
     // for (int ii = 0; ii < n; ii++) {
-    // 	fq_print_pretty(&res[ii], ctx_q);
-    // 	printf(" ");
+	// fq_print_pretty(&res[ii], ctx_q);
+	// printf(" ");
+	// fq_print_pretty(&ee[ii], ctx_q);
+	// printf("\n");
     // }
-    // // _fq_vec_print(res, n, ctx_q);
+    // _fq_vec_print(res, n, ctx_q);
     // printf("\n");
     
     // for (int ii = 0; ii < n; ii++) {
@@ -184,7 +197,7 @@ int main(int argc, char** argv, char** env) {
     // 	printf(" ");
     // }
     // printf("\n");
-    // // _fq_vec_print(ee, n, ctx_q);
+    // _fq_vec_print(ee, n, ctx_q);
     
     // printf("Dimension is %d \n", r);
     

@@ -575,7 +575,7 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
 	fq_poly_mulmod(tmp2, e1, h1, P, ctx_q);
 	fq_poly_add(tmp, tmp, tmp2, ctx_q);
 	fq_poly_add(tmp, tmp, sp, ctx_q);
-
+	
 	/* hamming weight of s' + threshold */
 	w = fq_poly_hamming_weight(tmp, ctx_q);
 	T = compute_threshold(w, i, r);
@@ -609,6 +609,7 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
     fq_struct* tmp1 = _fq_vec_init(r, ctx_q);
 
     if (fq_poly_equal(sp, synd, ctx_q)) {
+	fq_poly_print_pretty(sp, "x", ctx_q);
 	fq_poly_get_coeffs(tmp0, e0, r, ctx_q);
 	fq_poly_get_coeffs(tmp1, e1, r, ctx_q);
 	for (i = 0; i < n; ++i) {

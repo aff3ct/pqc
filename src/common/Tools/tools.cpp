@@ -618,7 +618,7 @@ BFIterv2(fq_poly_t e0, fq_poly_t e1, int* black, int* gray, const fq_poly_t sp,
 	}
 	/* printf("count is: %d and threshold is %d \n", count, T); */
         if (count >= T) {
-	    printf("count is %d and threshold is %d \n", count, T);
+	    // printf("count is %d and threshold is %d \n", count, T);
 	    if (j < r) {
 		fq_poly_get_coeff(tmp, e0, j, ctx);
 		fq_add(tmp, tmp, one, ctx);
