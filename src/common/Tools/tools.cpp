@@ -511,6 +511,40 @@ fq_matrix_expand(fq_mat_t res, const fq_mat_t H, const fq_ctx_t ctx, const fq_ct
 }
 
 
+
+
+/**
+ * Computes multiplication matrix of h in FF_q[X] / (P(X))
+ */
+void
+fq_mult_matrix(fq_mat_t res, const fq_poly_t h, const fq_poly_t P, const fq_ctx_t ctx) {
+    int i, j, d = fq_poly_degree(P, ctx);
+    fq_t tmp; fq_init(tmp, ctx);
+    fq_poly_t tmp_pol, gen;
+    fq_poly_init(tmp_pol, ctx);     fq_poly_init(gen, ctx);
+    fq_poly_set(tmp_pol, h, ctx);   fq_poly_gen(gen, ctx);
+    
+    for (i = 0; i < d; ++i) {
+	// printf("it is the %dth index in mult mat comp. \t ", i);
+	for (j = 0; j < d; ++j) {
+	    fq_poly_get_coeff(tmp, tmp_pol, j, ctx);
+	    fq_mat_entry_set(res, i, j, tmp, ctx);
+	}
+	fq_poly_mulmod(tmp_pol, tmp_pol, gen, P, ctx);
+    }
+    fq_clear(tmp, ctx);
+    fq_poly_clear(tmp_pol, ctx);
+    fq_poly_clear(gen, ctx);
+}
+
+
+
+/* **************************************************************************** */
+/*                                   BIKE                                       */
+/* **************************************************************************** */
+
+
+
 /** 
  * Counter function as in Bike documentation.
  * Computes the number of agreeing bits in vector v and jth column vector of H.
@@ -701,28 +735,40 @@ BFMaskedIterv2(fq_poly_t e0, fq_poly_t e1, const fq_poly_t sp, const int* pos0,
     fq_clear(tmp1, ctx);
 }
 
+/**
+ * Short: Computes BIKE parameters as in the specification document.
+ */
+void
+Bike_params(int& r, int& weight, int& error_weight, const int level) {
+    if (level == 1) {
+	r = 12323;
+	weight = 142;
+	error_weight = 134;
+    } else if (level == 3) {
+	r = 24659;
+	weight = 206;
+	error_weight = 199;
+    } else if (level == 5) {
+	r = 40973;
+	weight = 274;
+	error_weight = 264;
+    }
+}
 
 
 /**
- * Computes multiplication matrix of h in FF_q[X] / (P(X))
+ * Short: Computes BGF parameters NbIter and tau as in specification document.
  */
 void
-fq_mult_matrix(fq_mat_t res, const fq_poly_t h, const fq_poly_t P, const fq_ctx_t ctx) {
-    int i, j, d = fq_poly_degree(P, ctx);
-    fq_t tmp; fq_init(tmp, ctx);
-    fq_poly_t tmp_pol, gen;
-    fq_poly_init(tmp_pol, ctx);     fq_poly_init(gen, ctx);
-    fq_poly_set(tmp_pol, h, ctx);   fq_poly_gen(gen, ctx);
-    
-    for (i = 0; i < d; ++i) {
-	// printf("it is the %dth index in mult mat comp. \t ", i);
-	for (j = 0; j < d; ++j) {
-	    fq_poly_get_coeff(tmp, tmp_pol, j, ctx);
-	    fq_mat_entry_set(res, i, j, tmp, ctx);
-	}
-	fq_poly_mulmod(tmp_pol, tmp_pol, gen, P, ctx);
+BGF_params(int& NbIter, int& tau, const int level) {
+    if (level == 1) {
+	NbIter = 5;
+	tau = 3;
+    } else if (level == 3) {
+	NbIter = 5;
+	tau = 3;
+    } else if (level == 5) {
+	NbIter = 5;
+	tau = 3;
     }
-    fq_clear(tmp, ctx);
-    fq_poly_clear(tmp_pol, ctx);
-    fq_poly_clear(gen, ctx);
 }

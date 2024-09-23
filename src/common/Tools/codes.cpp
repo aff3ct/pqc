@@ -498,11 +498,7 @@ Bike_decoding(fq_struct* res, const fq_struct* s, const fq_mat_t& H,
 	    BFMaskedIter(e, tmp, H, d, gray, ctx_q);
 	}
 	
-	// for (int ii = 0; ii < n; ii++) {
-	//     fq_print_pretty(&e[ii], ctx_q);
-	//     printf(" ");
-	// }
-	// printf("\n");
+
     }
     
     fq_mat_mul_vec(synd, H, e, n, ctx_q); /* computation of syndrome : remove H */

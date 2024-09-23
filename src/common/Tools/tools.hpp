@@ -61,15 +61,18 @@ int
 fq_check_repeat(const fq_struct* a, const int len, const fq_ctx_t ctx);
 
 void
-fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx, flint_rand_t state);
+fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx,
+		     flint_rand_t state);
 
 void
-fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx, flint_rand_t state);
+fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx,
+		       flint_rand_t state);
 
 
 /* POLYNOMIALS */
 void
-fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len, const fq_ctx_t ctx);
+fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len,
+		   const fq_ctx_t ctx);
 
 void
 fq_poly_get_coeffs(fq_struct* res, const fq_poly_t f, const int len, const fq_ctx_t ctx);
@@ -82,11 +85,12 @@ void
 fq_poly_set_cyclic(fq_poly_t res, const int d, const fq_ctx_t ctx);
 
 int
-fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len, const fq_ctx_t ctx);
+fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len,
+		  const fq_ctx_t ctx);
 
 void
-fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta, const int len,
-			 const fq_ctx_t ctx);
+fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  beta,
+		    const int len, const fq_ctx_t ctx);
 
 void
 cm_fq_poly_irr_pol(fq_poly_t& res, const int deg, const fq_struct* alpha, const int len,
@@ -105,6 +109,12 @@ fq_matrix_expand(fq_mat_t res, const fq_mat_t H, const fq_ctx_t ctx,
 		      const fq_ctx_t ctx_q);
 
 
+void
+fq_mult_matrix(fq_mat_t res, const fq_poly_t h, const fq_poly_t P, const fq_ctx_t ctx);
+
+
+
+/* BIKE */
 int
 ctr(const fq_struct *v, const fq_mat_t &H,  const int j, const fq_ctx_t ctx);
 
@@ -121,9 +131,9 @@ BFIter(fq_struct* e, int* black, int* gray, const fq_struct* s,
 
 
 void
-BFIterv2(fq_poly_t e0, fq_poly_t e1, int* black, int* gray, const fq_poly_t sp, const int* pos0,
-	 const int* pos1, const int weight, const int r, const int T, const int tau,
-	 const fq_ctx_t ctx);
+BFIterv2(fq_poly_t e0, fq_poly_t e1, int* black, int* gray, const fq_poly_t sp,
+	 const int* pos0, const int* pos1, const int weight, const int r, const int T,
+	 const int tau, const fq_ctx_t ctx);
 
 
 void
@@ -137,9 +147,12 @@ BFMaskedIterv2(fq_poly_t e0, fq_poly_t e1, const fq_poly_t sp, const int* pos0,
 	       const int* mask, const fq_ctx_t ctx);
 
 
+void
+Bike_params(int& r, int& weight, int& error_weight, const int level);
+
 
 void
-fq_mult_matrix(fq_mat_t res, const fq_poly_t h, const fq_poly_t P, const fq_ctx_t ctx);
+BGF_params(int& NbIter, int& tau, const int level);
 
 
 

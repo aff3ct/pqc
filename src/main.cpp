@@ -83,19 +83,27 @@ int main(int argc, char** argv, char** env) {
 
     /* !! needs r such that 2 is primitive mod r !!  */
     /* int r = random_suitable_integer(6); */
-    int r = 12323;
+
+
+    int level = 5;
+
+    
+    int r = 0;
+    int weight = 0;
+    int error_weight = 0;
+    int NbIter = 0;
+    int tau = 0;
+    
+    Bike_params(r, weight, error_weight, level);
+    BGF_params(NbIter, tau, level);
+
+
+    cout << r << endl;
+    cout << NbIter << endl;
+    
     
     int len = 2*r;
     int n = len;
-
-    /* int weight = 10; */
-    int weight = 142;
-    /* int error_weight = 7; */
-    int error_weight = 134;
-
-    int NbIter = 5;
-    int tau = 3;
-    
 
     const int FRAME_SIZE = len;
     const int SYND_SIZE = r;
@@ -143,59 +151,6 @@ int main(int argc, char** argv, char** env) {
 	    }
 
     seq.exec_seq();
-    // seq.exec_seq();
-
-
-
-    
-    /* printf("Keygen done !\n"); */
-    
-    /* int e[n]; */
-    /* for (int i = 0; i < n; ++i) { */
-    /* 	e[i] = 0; */
-    /* } */
-    /* bike_gen_e(e, n, error_weight); */
-
-    /* fq_struct* ee = _fq_vec_init(n, ctx_q); */
-    /* _int_vec_2_fq(ee, e, n, ctx_q); */
-
-
-    /* fq_poly_t e0; fq_poly_init(e0, ctx_q); fq_poly_zero(e0, ctx_q); */
-    /* fq_poly_t e1; fq_poly_init(e1, ctx_q); fq_poly_zero(e1, ctx_q); */
-
-    /* for (int i = 0; i < n; ++i) { */
-    /*     if (i < r) { */
-    /* 	    fq_poly_set_coeff(e0, i, &ee[i], ctx_q); */
-    /*     } else { */
-    /* 	    fq_poly_set_coeff(e1, i - r, &ee[i], ctx_q); */
-    /*     } */
-    /* } */
-
-    /* fq_poly_t P; fq_poly_init(P, ctx_q); fq_poly_set_cyclic(P, r, ctx_q); */
-    /* fq_struct* s = _fq_vec_init(r, ctx_q); */
-
-    /* fq_poly_t sp; fq_poly_init(sp, ctx_q); */
-
-    /* /\* !!!  encoding and transformation does not seem to work !!! *\/ */
-    /* fq_poly_zero(sp, ctx_q); */
-    /* Bike_encoding(sp, e, PK.h,  r, ctx_q); */
-    /* fq_poly_mulmod(sp, sp, SK.h0, P, ctx_q); */
-
-    /* fq_struct* ss = _fq_vec_init(r, ctx_q); */
-
-    /* for (int k = 0; k < r; k++) { */
-    /* 	fq_poly_get_coeff(&ss[k], sp, k, ctx_q); */
-    /* } */
-    
-    /* fq_struct* res = _fq_vec_init(n, ctx_q); */
-    
-    /* int b = Bike_decoding_v2(res, ss, SK.h0, SK.h1, r, weight/2, NbIter, tau, ctx_q); */
-    
-    /* printf("successful decoding ?:  %d \n", b); */
-
-
-    /* printf("the vectors are equal:   %d \n", _fq_vec_equal(res, ee, n, ctx_q)); */
-    
     
     
     
@@ -315,27 +270,6 @@ int main(int argc, char** argv, char** env) {
 
 
     
-    /* fq_ctx_clear(ctx); */
-    /* fq_ctx_clear(ctx_q); */
-
-
-
-
-    /* int a = _fq_vec_print(SK.get_alpha(), len, ctx);  */
-
-    /* cout << " "  << endl; */
-
-    /* fq_poly_t& h  = SK.g; */
-    /* // h = SK.get_g(); */
-    /* fq_poly_print_pretty(h, "X",  ctx); */
-    /* cout << " "  << endl; */
-
-    /* fq_poly_one(h, ctx); */
-    /* fq_poly_print_pretty(h, "X",  ctx); */
-    /* cout << " "  << endl; */
-    
-    /* fq_poly_print_pretty(SK.g, "X",  ctx); */
-    /* cout << " "  << endl;  */
 
     
     /* ************************************************************************* */
