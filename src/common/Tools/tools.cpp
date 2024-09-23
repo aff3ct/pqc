@@ -73,14 +73,6 @@ hamming_weight(const fq_struct* v, const int len, const fq_ctx_t ctx) {
     return count;
 }
 
-/**
- * Short: print a vector in Flint library
- */
-void _fq_vec_print() {
-}
-
-
-
 
 
 /* **************************************************************************** */
@@ -107,22 +99,6 @@ fisher_yates(int* perm, const int n) {
 }
 
 
-/* Generates fixed weight vector as in Bike, i.e. using Fisher-Yates */
-void
-bike_gen_e(int* e, const int len, const int t) {
-    int perm[len];
-    for (int i = 0; i < len; ++i) {
-	perm[i] = 0;
-    }
-    fisher_yates(perm, len);
-    for (int i = 0 ; i < t; ++i) {
-	e[perm[i]] = 1;
-    }
-}
-
-
-
-
 slong*
 random_indices(const slong len, flint_rand_t state) {
     slong* perm = _perm_init(len);
@@ -145,11 +121,14 @@ int_check_repeat(const int* a, const int len) {
 
 
 
-/*  computes t random and pairwise distinct indexes in [1,n] as in Classic
-    McEliece
-    draw random τ > t elts in [1, N[ and take the t first ones that are in [1,n]
-    return the number of elts in [1,n] effectively computed
-    Typically in CM, N = 2^m
+
+
+/**
+ * Computes t random and pairwise distinct indexes in [1,n] as in Classic
+ * McEliece.
+ * Draws random τ > t elts in [1, N[ and takes the t first ones that are in [1,n].
+ * Returns the number of elts in [1,n] effectively computed.
+ * Typically in CM, N = 2^m.
 */
 int
 cm_random_indices(int* res, const int n, const int t, const int N, const int tau) {
@@ -173,12 +152,29 @@ cm_random_indices(int* res, const int n, const int t, const int N, const int tau
     return ind;
 }
 
+void random_bits(int *res, const int len) {
+    int ind = 0;
+    int count_loop = 0;
+    int a;
+
+    // rand with mersenne
+    std::random_device rd;
+    std::mt19937 rand_gen(rd());
+    std::uniform_int_distribution<std::mt19937::result_type> dis(0, 1);
+
+    for (int i = 0; i < len; ++i) {
+	res[i] = dis(rand_gen);
+    }
+}
+
 
 /* **************************************************************************** */
 /*                              ERROR GENERATION                                */
 /* **************************************************************************** */
 
-/* computes e as in Classic McEliece, more or less */
+/**
+ * Computes e as in Classic McEliece, more or less
+ */
 void
 cm_gen_e(int* e, const int n, const int t, const int N, const int tau) {
     int len, repet = 1;
@@ -191,6 +187,39 @@ cm_gen_e(int* e, const int n, const int t, const int N, const int tau) {
     }
     for (int i = 0; i <t; i++) {
 	e[inds[i]] = 1;
+    }
+}
+
+/**
+ * Generates fixed weight vector as in Bike, i.e. using
+ * Fisher-Yates
+*/
+void
+bike_gen_e(int* e, const int len, const int t) {
+    int perm[len];
+    for (int i = 0; i < len; ++i) {
+	perm[i] = 0;
+    }
+    fisher_yates(perm, len);
+    for (int i = 0 ; i < t; ++i) {
+	e[perm[i]] = 1;
+    }
+}
+
+
+/**
+ * Generates fixed weight vector as in HQC, i.e. using
+ * Fisher-Yates
+*/
+void
+hqc_gen_e(int* e, const int len, const int t) {
+    int perm[len];
+    for (int i = 0; i < len; ++i) {
+	perm[i] = 0;
+    }
+    fisher_yates(perm, len);
+    for (int i = 0 ; i < t; ++i) {
+	e[perm[i]] = 1;
     }
 }
 

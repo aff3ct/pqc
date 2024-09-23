@@ -33,9 +33,7 @@ hamming_weight(const fq_struct* v, const int len, const fq_ctx_t ctx);
 void
 fisher_yates(int* perm, const int n);
 
-void
-bike_gen_e(int* e, const int len, const int t);
-
+  
 // Classic McEliece
 slong*
 random_indices(const slong len, flint_rand_t state);
@@ -47,7 +45,17 @@ int
 cm_random_indices(int* res, const int n, const int t, const int N, const int tau);
 
 void
+random_bits(int *res, const int len);
+
+void
 cm_gen_e(int* e, const int n, const int t, const int N, const int tau);
+
+void
+bike_gen_e(int* e, const int len, const int t);
+
+// HQC
+void
+hqc_gen_e(int* e, const int len, const int t);
 
 
 /* FINITE FIELDS */

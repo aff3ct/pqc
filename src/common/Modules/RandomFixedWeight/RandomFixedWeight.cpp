@@ -47,10 +47,6 @@ void RandomFixedWeight::random_fixed_weight(int* input, int* output, const int f
 	    output[i] += e[i];
 	}
   
-    // for(auto i = 0; i < weight; i++)
-    //   {
-    //     output[dis(rand_gen)] += 1;
-    //   }
 }
 
 
