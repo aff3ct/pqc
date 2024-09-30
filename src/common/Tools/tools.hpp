@@ -60,6 +60,9 @@ hqc_gen_e(int* e, const int len, const int t);
 
 /* FINITE FIELDS */
 void
+_fq_vec_print_pretty(const fq_struct* v, const int len, const fq_ctx_t ctx);
+
+void
 _fq_vec_2_int(int* res, const fq_struct* a, const int len, const fq_ctx_t ctx);
 
 void
@@ -75,6 +78,14 @@ fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx,
 void
 fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx,
 		       flint_rand_t state);
+
+void
+fq_vec_shorten(fq_struct *res, const fq_struct *v, const int len,
+	       const fq_ctx_t ctx);
+
+void
+fq_vec_expand(fq_struct *res, const fq_struct *v, const int len1, const int len2,
+	      const fq_ctx_t ctx);
 
 
 /* POLYNOMIALS */

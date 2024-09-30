@@ -2,9 +2,9 @@
 #include <iostream>
 #include <flint/fq_mat.h>
 
-// /* **************************************************************************** */
-// /*                            structures of keys                                */
-// /* **************************************************************************** */
+/* **************************************************************************** */
+/*                            structures of keys                                */
+/* **************************************************************************** */
 
 
 // /* structure of a secret key
@@ -61,8 +61,9 @@
 
 
 
-/* Decoding algorithm for Reed-Solomon codes
-   Decode received message c wrt to RS_k(alpha)
+/**
+ * Decoding algorithm for Reed-Solomon codes
+ * Decode received message c wrt to RS_k(alpha)
 */
 int
 RS_decoder(fq_poly_t res, const fq_struct* c, const fq_struct* alpha, const int n, const int k,
@@ -80,12 +81,12 @@ RS_decoder(fq_poly_t res, const fq_struct* c, const fq_struct* alpha, const int 
     fq_t a; fq_init(a, ctx);
 
     for (int i = 0; i < n; ++i) {
-	fq_neg(a, &
-	       alpha[i], ctx);
+	fq_neg(a, &alpha[i], ctx);
 	fq_poly_set_coeff(tmp, 0, a, ctx);
 	fq_poly_mul(A, A, tmp, ctx);
     }
     fq_poly_interpolate(P, alpha, c, n, ctx);
+
     int d = k + (n-k +1 ) / 2 - 1; /* computes k + ceil((n-k)/2) -1 */
     xgcd_abort(u, v, D, A, P, d, ctx);
     int b = fq_poly_divides(res, D, v, ctx);
@@ -311,9 +312,9 @@ Goppa_parity_check(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, cons
 }
 
 
-
-/** Computes the parity check matrix of a Goppa code knowing it is *BINARY*
-*/
+/**
+ * Computes the parity check matrix of a Goppa code knowing it is *BINARY*
+ */
 void
 Goppa_parity_check_bin(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, const fq_ctx_t ctx) {
     int i, j, n, m;
@@ -331,9 +332,21 @@ Goppa_parity_check_bin(fq_mat_t res, const fq_struct* alpha, const fq_poly_t g, 
 /*                                   ENCODERS                                   */
 /* **************************************************************************** */
 
+/**
+ * Encoding for RS codes.
+ */
+void
+RS_encoding(fq_struct* res, const fq_poly_t f, const fq_struct* alpha, const int n,
+	    const fq_ctx_t ctx) {
+    int i = 0;
+    for (i = 0; i < n; ++i) {
+	fq_poly_evaluate_fq(&res[i], f, &alpha[i], ctx);
+    }
+}
 
-/* encoding as in CM
-   Compute the syndrome associated s = H * e associated to e
+/**
+ * Encoding as in CM.
+ * Compute the syndrome associated s = H * e associated to e.
 */
 void
 CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len, 
@@ -359,7 +372,8 @@ CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len
 
 
 
-/** Encoding as in Bike
+/**
+ * Encoding as in Bike
  * Compute s = e0 + e1 * h modulo X^r - 1
 */
 void 

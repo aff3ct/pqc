@@ -64,8 +64,6 @@ using namespace std;
 
 int main(int argc, char** argv, char** env) {
 
-
-
     fmpz_t p;
     slong m;
     fq_ctx_t ctx, ctx_q;
@@ -82,21 +80,36 @@ int main(int argc, char** argv, char** env) {
     /*                                TESTS FOR BIKE                             */
     /* ************************************************************************* */
 
+    int len = (1 << m) - 1;
+    int k = len - 10;
+    int t = (len-k)/2;
+    
+    fq_struct* alpha = _fq_vec_init(len, ctx);
+    fq_struct* codeword = _fq_vec_init(len, ctx);
+    fq_struct* c = _fq_vec_init(len, ctx);
+    fq_struct* cs = _fq_vec_init(20, ctx);
 
-    /* /\* test function "random_bits" *\/ */
-    /* int res[10]; */
-    /* random_bits(res, 10); */
-    /* for (int i = 0; i < 10; ++i) { */
-    /* 	cout << res[i] << "  "; */
-    /* } */
-    /* cout << endl; */
-    
-    
-    
-    
+    fq_vec_rand_distinct_2(alpha, len, ctx, state);
+
 
     
 
+
+    /* fq_poly_t message;     fq_poly_t m1; */
+    /* fq_poly_init(message, ctx);     fq_poly_init(m1, ctx); */
+
+    /* /\* in flint : length of poly is degree+1 *\/ */
+    /* fq_poly_randtest(message, state, k+1, ctx); */
+
+
+    /* RS_encoding(codeword, message, alpha, len, ctx); */
+    
+    /* RS_decoder(m1, codeword, alpha, len, k, ctx); */
+
+    
+    /* printf("the decoding is correct: %d\n", fq_poly_equal(m1, message, ctx)); */
+
+    
     // /* ************************************************************************* */
     // /*                                TESTS FOR BIKE                             */
     // /* ************************************************************************* */

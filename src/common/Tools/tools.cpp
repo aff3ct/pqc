@@ -60,8 +60,8 @@ compute_threshold(const int w, const int ind, const int r) {
 
 
 /**
- * Short: Hamming weight of a vector.
- */
+ * Hamming weight of a vector.
+*/
 int
 hamming_weight(const fq_struct* v, const int len, const fq_ctx_t ctx) {
     int count = 0;
@@ -230,6 +230,18 @@ hqc_gen_e(int* e, const int len, const int t) {
 /*                              FINITE FIELDS                                   */
 /* **************************************************************************** */
 
+/**
+ * Print vector
+ */
+void
+_fq_vec_print_pretty(const fq_struct* v, const int len, const fq_ctx_t ctx) {
+    for (int i = 0; i < len; ++i) {
+	fq_print_pretty(&v[i], ctx);
+	printf(" ");
+    }
+    printf("\n");
+}
+
 
 /*
   Go from finite field vec to integral vector
@@ -281,9 +293,11 @@ fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx,
 }
 
 
-/* generate a random vector whose coeffs are in a finite field and all distincts
-   WORK ONLY for *BINARY* fields
-   NOT THE MOST ELEGANT WAY -- MAYBE CHANGE */
+/**
+ * Generates a random vector whose coeffs are in a finite field and all distincts
+ * WORK ONLY for *BINARY* fields
+ * NOT THE MOST ELEGANT WAY -- MAYBE CHANGE
+ */
 void
 fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx,
 		       flint_rand_t state) {
@@ -299,7 +313,23 @@ fq_vec_rand_distinct_2(fq_struct* res, const int len, const fq_ctx_t ctx,
     fmpz_clear(tmp);
 }
 
+void
+fq_vec_shorten(fq_struct *res, const fq_struct *v, const int len,
+                    const fq_ctx_t ctx) {
+    _fq_vec_set(res, v, len, ctx);
+}
 
+/**
+ * Expand vector from length len1 to length len2 with zero coefficients.
+ */
+void
+fq_vec_expand(fq_struct *res, const fq_struct *v, const int len1, const int len2,
+	      const fq_ctx_t ctx) {
+    _fq_vec_set(res, v, len1, ctx);
+    for (int i = len1; i < len2; ++i) {
+	fq_zero(&res[i], ctx);
+    }
+}
 
 /* **************************************************************************** */
 /*                           POLYNOMIAL MANIPUTATION                            */
@@ -404,6 +434,7 @@ fq_poly_interpolate(fq_poly_t res, const fq_struct* alpha, const fq_struct*  bet
     }
 
     fq_poly_zero(res, ctx);	/* put res to zero */
+    
     for (int i = 0; i < len; i++) {
 	fq_neg(a, &alpha[i], ctx);
 	fq_poly_set_coeff(tmp, 0, a, ctx);
