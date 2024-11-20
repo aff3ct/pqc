@@ -74,6 +74,21 @@ hamming_weight(const fq_struct* v, const int len, const fq_ctx_t ctx) {
 }
 
 
+/**
+ * distance between 2 vectors.
+*/
+int
+hamming_distance(const fq_struct* v, const fq_struct* w, const int len, const fq_ctx_t ctx) {
+    int count = 0;
+    for (int i = 0; i < len; ++i) {
+      if (fq_equal(&v[i], &w[i], ctx)) {
+	    count++;
+	}
+    }
+    return count;
+}
+
+
 
 /* **************************************************************************** */
 /*                      RANDOM INDICES / PERMUTATIONS                           */
@@ -117,10 +132,6 @@ int_check_repeat(const int* a, const int len) {
     }
     return 0;
 }
-
-
-
-
 
 
 /**
@@ -281,6 +292,14 @@ fq_check_repeat(const fq_struct* a, const int len, const fq_ctx_t ctx) {
 }
 
 
+/* generate a random vector whose coeffs are in a finite field and all distincts */
+void
+fq_vec_rand(fq_struct* res, const int len, const fq_ctx_t ctx,
+		     flint_rand_t state) {
+    for (int i =  0; i < len; ++i) {
+	fq_randtest(&res[i], state, ctx);
+    }
+}
 
 /* generate a random vector whose coeffs are in a finite field and all distincts */
 void

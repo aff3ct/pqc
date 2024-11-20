@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <iostream>
+
 // #include <cstdlib>
 // #include <verilated.h>
 // #include <verilated_vcd_c.h>
@@ -18,7 +19,6 @@
 #include "flint/perm.h"		/* permutations */
 #include "flint/fq_mat.h"	/* matrix / finite fields */
 
-// #include "SerialPort.hpp"
 
 #include "common/Tools/tools.hpp"
 #include "common/Tools/codes.hpp"
@@ -34,10 +34,6 @@
 #include "Tools/Bike/Bike_keygen.hpp"
 
 
-
-// #include "VTop_Level.h"
-// #include "VerilatorSimulation.hpp"
-// #include "MySource.hpp"
 #include "Modules/Comparator/Comparator.hpp"
 #include "Modules/SyndComparator/SyndComparator.hpp"
 #include "Modules/CM_RandomFixedWeight/CM_RandomFixedWeight.hpp"
@@ -76,8 +72,9 @@ int main(int argc, char** argv, char** env) {
     FLINT_TEST_INIT(state);
     
 
+
     /* ************************************************************************* */
-    /*                                TESTS FOR BIKE                             */
+    /*                                TESTS FOR HQC                             */
     /* ************************************************************************* */
 
     int len = (1 << m) - 1;
@@ -90,26 +87,52 @@ int main(int argc, char** argv, char** env) {
     fq_struct* cs = _fq_vec_init(20, ctx);
 
     fq_vec_rand_distinct_2(alpha, len, ctx, state);
+   
+    fq_poly_t message;     fq_poly_t m1;
+    fq_poly_init(message, ctx);     fq_poly_init(m1, ctx);
 
+    /* in flint : length of poly is degree+1 */
+    fq_poly_randtest(message, state, k+1, ctx);
 
+    RS_encoding(codeword, message, alpha, len, ctx);
+    RS_decoder(m1, codeword, alpha, len, k, ctx);
     
+    printf("the decoding is correct: %d\n", fq_poly_equal(m1, message, ctx));
 
 
-    /* fq_poly_t message;     fq_poly_t m1; */
-    /* fq_poly_init(message, ctx);     fq_poly_init(m1, ctx); */
-
-    /* /\* in flint : length of poly is degree+1 *\/ */
-    /* fq_poly_randtest(message, state, k+1, ctx); */
-
-
-    /* RS_encoding(codeword, message, alpha, len, ctx); */
+    int _m = 4;
+    int _len = 1 << 4;
+    int _k = _m + 1;
     
-    /* RS_decoder(m1, codeword, alpha, len, k, ctx); */
+    fq_struct* aa = _fq_vec_init(_k, ctx_q);
+    fq_struct* bb = _fq_vec_init(_len, ctx_q);
+    fq_struct* cc = _fq_vec_init(_len*2, ctx_q);
+    fq_struct* dd = _fq_vec_init(_k, ctx_q);
+    // fq_struct* ee = _fq_vec_init(_len * 2, ctx_q);
+    int ee[2*_len];
 
-    
-    /* printf("the decoding is correct: %d\n", fq_poly_equal(m1, message, ctx)); */
 
-    
+
+    for (int _i = 0; _i < 10; _i++) {
+	fq_vec_rand(aa, _k, ctx_q, state);
+	_fq_vec_print_pretty(aa, _k, ctx_q);
+
+	RM_encoding_duplicated(cc, aa, _m, 2, ctx_q);
+	// _fq_vec_print_pretty(cc, _len * 2, ctx_q);
+
+	hqc_gen_e(ee, _len * 2, 16);
+
+	fq_t tmp; fq_init(tmp, ctx_q);
+
+	for (int i = 0; i < 2 * _len; i++) {
+	    fq_set_ui(tmp, ee[i], ctx_q);
+	    fq_add(&cc[i], &cc[i], tmp, ctx_q);
+	}
+
+	RM_decoding_duplicated(dd, cc, 4, 2, ctx_q);
+	_fq_vec_print_pretty(dd, 5, ctx_q);
+    }
+
     // /* ************************************************************************* */
     // /*                                TESTS FOR BIKE                             */
     // /* ************************************************************************* */

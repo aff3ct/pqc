@@ -43,6 +43,12 @@ RS_encoding(fq_struct* res, const fq_poly_t f, const fq_struct* alpha, const int
 	    const fq_ctx_t ctx);
 
 void
+RM_encoding(fq_struct* res, const fq_struct* alpha, const int m, const fq_ctx_t ctx);
+
+void
+RM_encoding_duplicated(fq_struct* res, const fq_struct* alpha, const int m, const int r, const fq_ctx_t ctx);
+
+void
 CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len, 
 	    const fq_ctx_t& ctx_q);
 
@@ -72,6 +78,10 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
 		 const fq_poly_t h1, const int r, const int weight,
 		 const int NbIter, const int tau,
 		 const fq_ctx_t ctx_q);
+
+
+void
+RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const int r, const fq_ctx_t ctx);
 
 
 #endif // CODES_H

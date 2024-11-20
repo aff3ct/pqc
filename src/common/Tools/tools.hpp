@@ -27,6 +27,9 @@ compute_threshold(const int w, const int ind, const int r);
 int
 hamming_weight(const fq_struct* v, const int len, const fq_ctx_t ctx);
 
+int
+hamming_distance(const fq_struct* v, const fq_struct* w, const int len, const fq_ctx_t ctx);
+
 
 /* ERROR GENERATION */
 // Bike
@@ -71,6 +74,9 @@ _int_vec_2_fq(fq_struct* res, const int* a, const int len, const fq_ctx_t ctx);
 int
 fq_check_repeat(const fq_struct* a, const int len, const fq_ctx_t ctx);
 
+void
+fq_vec_rand(fq_struct* res, const int len, const fq_ctx_t ctx,
+	    flint_rand_t state);
 void
 fq_vec_rand_distinct(fq_struct* res, const int len, const fq_ctx_t ctx,
 		     flint_rand_t state);

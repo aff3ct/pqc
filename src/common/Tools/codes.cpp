@@ -2,58 +2,6 @@
 #include <iostream>
 #include <flint/fq_mat.h>
 
-/* **************************************************************************** */
-/*                            structures of keys                                */
-/* **************************************************************************** */
-
-
-// /* structure of a secret key
-//    alpha : Vector of elements in a finite field FF_{q^m}
-//    g : irreducible polynomial over FF_{q^m} */
-// struct CM_sk {
-//     fq_struct* alpha;
-//     fq_poly_t g;
-// };
-
-
-// /* initialisation of secret key */
-// void
-// init_CM_sk(struct CM_sk* sk, const int n, const fq_ctx_t ctx) {
-//     sk->alpha = _fq_vec_init(n, ctx);
-//     fq_poly_init(sk->g, ctx);
-// }
-
-// /* memory clear of secret key */
-// void
-// clear_CM_sk(struct CM_sk* sk, const int n, const fq_ctx_t ctx) {
-//     _fq_vec_clear(sk->alpha, n, ctx);
-//     fq_poly_clear(sk->g, ctx);
-// }
-
-
-// /* structure of public key
-//    matrix of elements in a finite field
-// */
-// struct CM_pk  {
-//     fq_mat_t T;			/* this is the true PK */
-// };
-
-
-// /* initialisation of public key */
-// void
-// init_CM_pk(struct CM_pk* pk, const int n,  const int t, const fq_ctx_t ctx,
-// 	const fq_ctx_t ctx_q) {
-//     fq_mat_init(pk->T, t * fq_ctx_degree(ctx), n - t * fq_ctx_degree(ctx), ctx_q);
-// }
-
-// /* memory clear of public key */
-// void
-// clear_CM_pk(struct CM_pk* pk, const int n,  const int t, const fq_ctx_t ctx,
-// 	 const fq_ctx_t ctx_q) {
-//     fq_mat_clear(pk->T, ctx_q);
-// }
-
-
 
 /* **************************************************************************** */
 /*                                   DECODERS                                   */
@@ -210,6 +158,12 @@ Goppa_decoder_bin(fq_struct* res, const fq_struct* c, const fq_struct* alpha,
 }
 
 
+
+
+/* **************************************************************************** */
+/*                                   MISC                                       */
+/* **************************************************************************** */
+
 /* random codeword of the Goppa code Gamma(alpha, g) */
 void
 Goppa_codeword_random(fq_struct* res, const fq_struct* alpha, const fq_poly_t g, const int len,
@@ -345,12 +299,53 @@ RS_encoding(fq_struct* res, const fq_poly_t f, const fq_struct* alpha, const int
 }
 
 /**
+ * Encoding for Reed-Muller codes of parameters (1, m)
+ * IN: alpha is a vector over FF_2
+ * OUT: vector of 1 + sum_{0 < i < m} alpha_i *  X_i evaluated in all elements of FF_2^n
+ */
+void
+RM_encoding(fq_struct* res, const fq_struct* alpha, const int m, const fq_ctx_t ctx) {
+    fq_t tmp; fq_init(tmp, ctx);
+    fq_t tmp1; fq_init(tmp1, ctx);
+    
+    for (int i=0; i < (1 << m); ++i) {
+	 fq_set(tmp, &alpha[0], ctx);
+	 fq_zero(tmp1, ctx);
+	 for (int j = 0; j < m; ++j) {
+	     fq_set_ui(tmp1, (i>>j)&1, ctx);
+	     fq_mul(tmp1, tmp1, &alpha[j+1], ctx);
+	     fq_add(tmp, tmp, tmp1, ctx);
+	 }
+	 fq_set(&res[i], tmp, ctx);
+    }  
+}
+
+/**
+ * Encoding for duplicated Reed-Muller codes of parameters (1, m)
+ * IN: alpha is a vector over FF_2
+ * OUT: vector of 1 + sum_{0 < i < m} alpha_i *  X_i evaluated in all elements of FF_2^n duplicated r times
+ */
+void
+RM_encoding_duplicated(fq_struct* res, const fq_struct* alpha, const int m, const int r, const fq_ctx_t ctx) {
+    fq_struct* tmp_vec = _fq_vec_init(1<<m, ctx);
+    RM_encoding(tmp_vec, alpha, m, ctx);
+    for (int i = 0; i < r; ++i) {
+	for (int j = 0; j < (1<<m); ++j) {
+	    fq_set(&res[i*(1<<m) + j], &tmp_vec[j], ctx);
+	}
+    }
+}
+
+
+
+/**
  * Encoding as in CM.
  * Compute the syndrome associated s = H * e associated to e.
 */
 void
 CM_encoding(fq_struct* res, const fq_struct* e, const fq_mat_t& T, const int len, 
 	    const fq_ctx_t& ctx_q)  {
+
     /* nb of rows and columns in T */
     int n = fq_mat_nrows(T, ctx_q);
     int m = fq_mat_ncols(T, ctx_q);
@@ -578,7 +573,7 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
 	
 	/* BFIter with polynomials */
 	BFIterv2(e0, e1, black, gray, tmp, pos0, pos1, weight, r, T, tau, ctx_q);
-
+	
 	
 	if (i==0) {
 	    BFMaskedIterv2(e0, e1, tmp, pos0, pos1, weight, r, d, black, ctx_q); 
@@ -621,3 +616,48 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
     return b;
 }
 
+
+
+
+/**
+ * Decoding as in HQC.
+ * We are doing it with closest vector : dimensions allow it.
+ */
+void
+RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const int r, const fq_ctx_t ctx) {
+    int i, j, k, dist, min_dist, len;
+    len = r * (1<<m);
+    fq_struct* tmp_m = _fq_vec_init(m + 1, ctx);
+    fq_struct* tmp_c = _fq_vec_init(len, ctx);
+
+    /* initialisation at 0 */
+    _fq_vec_zero(tmp_m, m+1, ctx);
+    RM_encoding_duplicated(tmp_c, tmp_m, m, r, ctx);
+    min_dist = hamming_distance(c, tmp_c, len, ctx);
+    _fq_vec_set(res, tmp_m, m+1, ctx);
+
+    for (k=1; k < (1<<(m+1)); ++k) {
+	for (i = 0; i < m+1; i++) {
+	    fq_set_ui(&tmp_m[i], (k>>i)&1, ctx);
+	}
+
+
+	RM_encoding_duplicated(tmp_c, tmp_m, m, r, ctx);
+
+	
+	dist = hamming_distance(c, tmp_c, len, ctx);
+
+	if (dist < min_dist) {
+	    min_dist = dist;
+	    _fq_vec_set(res, tmp_m, m+1, ctx);
+	}
+
+	if (min_dist == 0) {
+	    break;
+	}
+
+	
+    }
+
+   
+}
