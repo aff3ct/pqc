@@ -640,13 +640,18 @@ RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const in
 	for (i = 0; i < m+1; i++) {
 	    fq_set_ui(&tmp_m[i], (k>>i)&1, ctx);
 	}
+	/* std::cout << k << std::endl; */
 
+	/* _fq_vec_print_pretty(tmp_m, m+1, ctx); */
+	/* std::cout <<  std::endl; */
 
 	RM_encoding_duplicated(tmp_c, tmp_m, m, r, ctx);
 
 	
 	dist = hamming_distance(c, tmp_c, len, ctx);
-
+	/* std::cout << dist << " " << min_dist << std::endl; */
+	/* std::cout << std::endl; */
+	    
 	if (dist < min_dist) {
 	    min_dist = dist;
 	    _fq_vec_set(res, tmp_m, m+1, ctx);

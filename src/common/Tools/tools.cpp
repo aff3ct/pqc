@@ -81,7 +81,7 @@ int
 hamming_distance(const fq_struct* v, const fq_struct* w, const int len, const fq_ctx_t ctx) {
     int count = 0;
     for (int i = 0; i < len; ++i) {
-      if (fq_equal(&v[i], &w[i], ctx)) {
+      if (!fq_equal(&v[i], &w[i], ctx)) {
 	    count++;
 	}
     }

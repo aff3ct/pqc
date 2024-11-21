@@ -100,37 +100,52 @@ int main(int argc, char** argv, char** env) {
     printf("the decoding is correct: %d\n", fq_poly_equal(m1, message, ctx));
 
 
-    int _m = 4;
-    int _len = 1 << 4;
+    int _m = m;
+    int _len = 1 << _m;
     int _k = _m + 1;
+    int r = 3;
     
     fq_struct* aa = _fq_vec_init(_k, ctx_q);
     fq_struct* bb = _fq_vec_init(_len, ctx_q);
-    fq_struct* cc = _fq_vec_init(_len*2, ctx_q);
+    fq_struct* cc = _fq_vec_init(_len*r, ctx_q);
     fq_struct* dd = _fq_vec_init(_k, ctx_q);
-    // fq_struct* ee = _fq_vec_init(_len * 2, ctx_q);
-    int ee[2*_len];
-
+    fq_struct* ee1 = _fq_vec_init(_len * r, ctx_q);
+    int ee[r*_len];
+    
 
 
     for (int _i = 0; _i < 10; _i++) {
 	fq_vec_rand(aa, _k, ctx_q, state);
 	_fq_vec_print_pretty(aa, _k, ctx_q);
 
-	RM_encoding_duplicated(cc, aa, _m, 2, ctx_q);
-	// _fq_vec_print_pretty(cc, _len * 2, ctx_q);
+	// RM_encoding(bb, aa, _m, ctx_q);
+	RM_encoding_duplicated(cc, aa, _m, r, ctx_q);
 
-	hqc_gen_e(ee, _len * 2, 16);
+	// _fq_vec_print_pretty(bb, _len , ctx_q);
+	// _fq_vec_print_pretty(cc, _len * r, ctx_q);
+	for (int __a = 0; __a < _len * r; __a++) {
+	ee[__a] = 0;
+	}
+	hqc_gen_e(ee, _len * r, 128);
 
 	fq_t tmp; fq_init(tmp, ctx_q);
 
-	for (int i = 0; i < 2 * _len; i++) {
+	for (int i = 0; i < r * _len; i++) {
 	    fq_set_ui(tmp, ee[i], ctx_q);
 	    fq_add(&cc[i], &cc[i], tmp, ctx_q);
 	}
+	
+       
+       
+	
+	RM_decoding_duplicated(dd, cc, _m, r, ctx_q);
 
-	RM_decoding_duplicated(dd, cc, 4, 2, ctx_q);
-	_fq_vec_print_pretty(dd, 5, ctx_q);
+
+	_fq_vec_print_pretty(dd, _k, ctx_q);
+
+	cout <<_fq_vec_equal(dd, aa, _m+1, ctx_q) << endl;
+
+	cout << "****************" << endl;
     }
 
     // /* ************************************************************************* */
