@@ -71,6 +71,15 @@ _fq_vec_2_int(int* res, const fq_struct* a, const int len, const fq_ctx_t ctx);
 void
 _int_vec_2_fq(fq_struct* res, const int* a, const int len, const fq_ctx_t ctx);
 
+void
+_fmpz_vec_2_fq(fq_struct* res, const fmpz* a, const int len, const fq_ctx_t ctx);
+
+void
+_fq_vec_2_fmpz(fmpz* res, const fq_struct* a, const int len, const fq_ctx_t ctx);
+
+void fq_get_coeffs(fq_struct *res, const fq_struct a, const int m,
+                   const fq_ctx_t ctx, const fq_ctx_t ctx_q);
+
 int
 fq_check_repeat(const fq_struct* a, const int len, const fq_ctx_t ctx);
 
@@ -103,11 +112,27 @@ void
 fq_poly_get_coeffs(fq_struct* res, const fq_poly_t f, const int len, const fq_ctx_t ctx);
 
 void
+fmpz_poly_set_coeffs(fmpz_poly_t f, const fmpz* a, const int len);
+  
+void
+fmpz_poly_get_coeffs(fmpz* res, const fmpz_poly_t f, const int len);
+
+  
+void
 fq_poly_nonzero_coeffs(int* pos, const fq_poly_t f, const int r,
 			    const fq_ctx_t ctx);
 
 void
 fq_poly_set_cyclic(fq_poly_t res, const int d, const fq_ctx_t ctx);
+
+
+void
+fq_poly_set_linear(fq_poly_t res, const fq_t alpha, const fq_ctx_t ctx);
+
+
+void
+fq_poly_set_linear_product(fq_poly_t res, const fq_struct* alpha, const int len,
+			   const fq_ctx_t ctx);
 
 int
 fq_poly_eval_zero(const fq_poly_t f, const fq_struct *alpha, const int len,

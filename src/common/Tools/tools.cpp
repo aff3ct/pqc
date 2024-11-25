@@ -66,7 +66,7 @@ int
 hamming_weight(const fq_struct* v, const int len, const fq_ctx_t ctx) {
     int count = 0;
     for (int i = 0; i < len; ++i) {
-	if (fq_is_zero(&v[i], ctx)) {
+	if (!fq_is_zero(&v[i], ctx)) {
 	    count++;
 	}
     }
@@ -226,6 +226,7 @@ void
 hqc_gen_e(int* e, const int len, const int t) {
     int perm[len];
     for (int i = 0; i < len; ++i) {
+	e[i] = 0;
 	perm[i] = 0;
     }
     fisher_yates(perm, len);
@@ -254,9 +255,9 @@ _fq_vec_print_pretty(const fq_struct* v, const int len, const fq_ctx_t ctx) {
 }
 
 
-/*
-  Go from finite field vec to integral vector
-  Assume a is 0 or 1 */
+/**
+ * Go from finite field vec to integral vector
+ */
 void
 _fq_vec_2_int(int* res, const fq_struct* a, const int len, const fq_ctx_t ctx) {
     fmpz_t tmp;
@@ -269,9 +270,9 @@ _fq_vec_2_int(int* res, const fq_struct* a, const int len, const fq_ctx_t ctx) {
 }
 
 
-/*
-  Go from integral vector  to finite field vec 
-  Assume a is 0 or 1 */
+/**
+ * Go from integral vector to finite field vec 
+*/
 void
 _int_vec_2_fq(fq_struct* res, const int* a, const int len, const fq_ctx_t ctx) {
     for (int i = 0 ; i < len; ++i) {
@@ -279,6 +280,44 @@ _int_vec_2_fq(fq_struct* res, const int* a, const int len, const fq_ctx_t ctx) {
     }
 }
 
+/**
+ * Go from integral vector (fmpz) to finite field vec 
+ */
+void
+_fmpz_vec_2_fq(fq_struct* res, const fmpz* a, const int len, const fq_ctx_t ctx) {
+    for (int i = 0 ; i < len; ++i) {
+	fq_set_fmpz(&res[i], &a[i], ctx);
+    }
+}
+
+/**
+ * Go from finite field vector to  integral vector (fmpz) 
+ */
+void
+_fq_vec_2_fmpz(fmpz* res, const fq_struct* a, const int len, const fq_ctx_t ctx) {
+    int b;
+    for (int i = 0 ; i < len; ++i) {
+	b = fq_get_fmpz(&res[i], &a[i], ctx);
+    }
+}
+
+
+/**
+ * Computes the coeffs in F_q of an elt 'a' of F_q^m / F_q
+ */
+void fq_get_coeffs(fq_struct *res, const fq_struct a, const int m,
+                   const fq_ctx_t ctx, const fq_ctx_t ctx_q) {
+
+    fmpz_poly_t tmp_poly; fmpz_poly_init(tmp_poly);
+    fmpz* tmp_vec = _fmpz_vec_init(m);
+
+    fq_get_fmpz_poly(tmp_poly, &a, ctx);
+    fmpz_poly_get_coeffs(tmp_vec, tmp_poly, m);
+    _fmpz_vec_2_fq(res, tmp_vec, m, ctx_q);
+
+    _fmpz_vec_clear(tmp_vec, m);
+    fmpz_poly_clear(tmp_poly);
+}
 
 /* check repetitions in finite fields in a naive way */
 int
@@ -365,13 +404,38 @@ fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len,
     }
 }
 
+
+
 /**
- * Get the coefficients of a polynomial and store it in a vector.
+ * Get the coefficients of a polynomial over finite field and store it in a
+ * vector.
  */
 void
 fq_poly_get_coeffs(fq_struct* res, const fq_poly_t f, const int len, const fq_ctx_t ctx) {
     for (int i = 0; i < len; i++) {
 	fq_poly_get_coeff(&res[i], f, i, ctx);
+    }
+}
+
+/**
+ * Set the coefficients of a polynomial over integers (fmpz).
+ */
+void
+fmpz_poly_set_coeffs(fmpz_poly_t f, const fmpz* a, const int len) {
+    for (int i = 0; i < len; i++) {
+      fmpz_poly_set_coeff_fmpz(f, i, &a[i]);
+    }
+}
+
+
+/**
+ * Get the coefficients of a polynomial over integers (fmpz) and store it in a
+ * vector.
+ */
+void
+fmpz_poly_get_coeffs(fmpz* res, const fmpz_poly_t f, const int len) {
+    for (int i = 0; i < len; i++) {
+	fmpz_poly_get_coeff_fmpz(&res[i], f, i);
     }
 }
 
@@ -407,6 +471,45 @@ fq_poly_set_cyclic(fq_poly_t res, const int d, const fq_ctx_t ctx) {
     fq_poly_set_coeff(res, 0, tmp, ctx);
     fq_clear(tmp, ctx);
 }
+
+/**
+ * Sets res to "linear polynomial", i.e. X + alpha 
+ */
+void
+fq_poly_set_linear(fq_poly_t res, const fq_t alpha, const fq_ctx_t ctx) {
+    fq_poly_zero(res, ctx);
+    fq_t tmp; fq_init(tmp, ctx);
+    fq_one(tmp, ctx);
+    fq_poly_set_coeff(res, 1, tmp, ctx);
+    fq_poly_set_coeff(res, 0, alpha, ctx);
+    fq_clear(tmp, ctx);
+}
+
+/**
+ * Sets res to the product of "linear polynomials", i.e. prod_alpha X + alpha 
+ */
+void
+fq_poly_set_linear_product(fq_poly_t res, const fq_struct* alpha, const int len,
+			   const fq_ctx_t ctx) {
+    fq_poly_one(res, ctx);
+
+    fq_poly_t tmp_pol;
+    fq_poly_zero(tmp_pol, ctx);
+
+
+    fq_t tmp; fq_init(tmp, ctx);    
+    fq_one(tmp, ctx);
+    fq_poly_set_coeff(tmp_pol, 1, tmp, ctx);
+    
+    for (int i = 0; i < len; ++i) {
+	fq_poly_set_coeff(tmp_pol, 0, &alpha[i], ctx);
+	fq_poly_mul_classical(res, res, tmp_pol, ctx);
+    }
+
+    fq_poly_clear(tmp_pol, ctx);
+    fq_clear(tmp, ctx);
+}
+
 
 
 /**

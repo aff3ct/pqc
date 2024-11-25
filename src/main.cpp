@@ -65,7 +65,7 @@ int main(int argc, char** argv, char** env) {
     fq_ctx_t ctx, ctx_q;
     
     fmpz_init_set_ui(p, 2);
-    m = 7;
+    m = 8;
     fq_ctx_init_conway(ctx, p, m, "x");
     fq_ctx_init_conway(ctx_q, p, 1, "α");
 
@@ -77,76 +77,118 @@ int main(int argc, char** argv, char** env) {
     /*                                TESTS FOR HQC                             */
     /* ************************************************************************* */
 
-    int len = (1 << m) - 1;
-    int k = len - 10;
-    int t = (len-k)/2;
-    
-    fq_struct* alpha = _fq_vec_init(len, ctx);
-    fq_struct* codeword = _fq_vec_init(len, ctx);
-    fq_struct* c = _fq_vec_init(len, ctx);
-    fq_struct* cs = _fq_vec_init(20, ctx);
+    int n1 = 46;			/* length for RS code */
+    int k = 16;			/* degree for RS code */
+    int r = 3;			/* number of times the RM code is duplicated */
+    int n2 = 1 << (m-1);	/* length of RM(1, m) code */
+    int len = r * n1 * n2;
+   
+    /* int len = (1 << m) - 1; */
+    /* int k = len - 10; */
+    /* int t = (len-k)/2; */
 
-    fq_vec_rand_distinct_2(alpha, len, ctx, state);
+    fq_struct* alpha = _fq_vec_init(n1, ctx);
+    fq_struct* codeword = _fq_vec_init(len, ctx_q);
+    fq_struct* codeword1 = _fq_vec_init(len, ctx_q);
+    fq_struct* codeword2 = _fq_vec_init(len, ctx_q);
+
+    _fq_vec_zero(codeword, len, ctx_q);
+    _fq_vec_zero(codeword1, len, ctx_q);
+    _fq_vec_zero(codeword2, len, ctx_q);
+    
+    fq_vec_rand_distinct_2(alpha, n1, ctx, state);
    
     fq_poly_t message;     fq_poly_t m1;
     fq_poly_init(message, ctx);     fq_poly_init(m1, ctx);
 
+    fq_poly_t res; fq_poly_init(res, ctx);
+    
     /* in flint : length of poly is degree+1 */
-    fq_poly_randtest(message, state, k+1, ctx);
+    fq_poly_randtest(message, state, k, ctx);
 
-    RS_encoding(codeword, message, alpha, len, ctx);
-    RS_decoder(m1, codeword, alpha, len, k, ctx);
+    /* RS_encoding(codeword, message, alpha, len, ctx); */
+    /* RS_decoder(m1, codeword, alpha, len, k, ctx); */
     
-    printf("the decoding is correct: %d\n", fq_poly_equal(m1, message, ctx));
-
-
-    int _m = m;
-    int _len = 1 << _m;
-    int _k = _m + 1;
-    int r = 3;
+    /* printf("the decoding of RS is correct: %d\n", fq_poly_equal(m1, message, ctx));       */
     
-    fq_struct* aa = _fq_vec_init(_k, ctx_q);
-    fq_struct* bb = _fq_vec_init(_len, ctx_q);
-    fq_struct* cc = _fq_vec_init(_len*r, ctx_q);
-    fq_struct* dd = _fq_vec_init(_k, ctx_q);
-    fq_struct* ee1 = _fq_vec_init(_len * r, ctx_q);
-    int ee[r*_len];
+    /* fq_struct* c = _fq_vec_init(len, ctx); */
+    /* fq_struct* cs = _fq_vec_init(20, ctx); */
+    /* fq_struct* aa = _fq_vec_init(_k, ctx_q); */
+    /* fq_struct* bb = _fq_vec_init(_len, ctx_q); */
+    /* fq_struct* cc = _fq_vec_init(_len*r, ctx_q); */
+    /* fq_struct* dd = _fq_vec_init(_k, ctx_q); */
+    /* fq_struct* ee1 = _fq_vec_init(_len * r, ctx_q); */
+
+
+    /* fq_struct* res = _fq_vec_init(len * r * _len, ctx_q); */
+
+
+    RS_RM_concatenated_encoding(codeword, message, alpha, n1, ctx, r, ctx_q);
+    _fq_vec_print_pretty(codeword, len, ctx_q);
     
+    int ee[len];
+    
+    hqc_gen_e(ee, len, 250);
+    
+    fq_t tmp; fq_init(tmp, ctx_q);
 
-
-    for (int _i = 0; _i < 10; _i++) {
-	fq_vec_rand(aa, _k, ctx_q, state);
-	_fq_vec_print_pretty(aa, _k, ctx_q);
-
-	// RM_encoding(bb, aa, _m, ctx_q);
-	RM_encoding_duplicated(cc, aa, _m, r, ctx_q);
-
-	// _fq_vec_print_pretty(bb, _len , ctx_q);
-	// _fq_vec_print_pretty(cc, _len * r, ctx_q);
-	for (int __a = 0; __a < _len * r; __a++) {
-	ee[__a] = 0;
-	}
-	hqc_gen_e(ee, _len * r, 128);
-
-	fq_t tmp; fq_init(tmp, ctx_q);
-
-	for (int i = 0; i < r * _len; i++) {
-	    fq_set_ui(tmp, ee[i], ctx_q);
-	    fq_add(&cc[i], &cc[i], tmp, ctx_q);
-	}
-	
-       
-       
-	
-	RM_decoding_duplicated(dd, cc, _m, r, ctx_q);
-
-
-	_fq_vec_print_pretty(dd, _k, ctx_q);
-
-	cout <<_fq_vec_equal(dd, aa, _m+1, ctx_q) << endl;
-
-	cout << "****************" << endl;
+    for (int i = 0; i < len; i++) {
+	fq_set_ui(tmp, ee[i], ctx_q);
+	fq_add(&codeword1[i], &codeword[i], tmp, ctx_q);
     }
+
+    _fq_vec_print_pretty(codeword1, len, ctx_q);
+
+    _fq_vec_add(codeword2, codeword, codeword1, len, ctx_q);
+    _fq_vec_print_pretty(codeword2, len, ctx_q);    
+    
+    cout << "hamming distance: " << hamming_distance(codeword, codeword1, len, ctx_q) << endl;
+    cout << "hamming weight: " << hamming_weight(codeword2, len, ctx_q) << endl;
+    
+    RS_RM_concatenated_decoding(res, codeword1, alpha, n1, k, ctx, r, ctx_q);
+
+    int b = fq_poly_print_pretty(message, "T", ctx);
+    cout << endl;
+    cout << endl;
+    b = fq_poly_print_pretty(res, "T", ctx);
+
+    cout << endl;
+    cout << endl;
+
+    cout << "decoding successful ?  " << fq_poly_equal(message, res, ctx) << endl;
+    
+    
+    /* _fq_vec_print_pretty(message, len, ctx_q); */
+    
+
+
+    // for (int _i = 0; _i < 10; _i++) {
+    // 	fq_vec_rand(aa, _k, ctx_q, state);
+    // 	_fq_vec_print_pretty(aa, _k, ctx_q);
+
+    // 	// RM_encoding(bb, aa, _m, ctx_q);
+    // 	RM_encoding_duplicated(cc, aa, _m, r, ctx_q);
+
+    // 	// _fq_vec_print_pretty(bb, _len , ctx_q);
+    // 	// _fq_vec_print_pretty(cc, _len * r, ctx_q);
+    // 	for (int __a = 0; __a < _len * r; __a++) {
+    // 	    ee[__a] = 0; 
+    // 	} 
+
+    // 	}
+	
+       
+       
+	
+    // 	RM_decoding_duplicated(dd, cc, _m, r, ctx_q);
+
+
+    // 	_fq_vec_print_pretty(dd, _k, ctx_q);
+
+    // 	cout <<_fq_vec_equal(dd, aa, _m+1, ctx_q) << endl;
+
+    // 	cout << "****************" << endl;
+    // }
 
     // /* ************************************************************************* */
     // /*                                TESTS FOR BIKE                             */

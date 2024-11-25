@@ -84,4 +84,14 @@ void
 RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const int r, const fq_ctx_t ctx);
 
 
+
+void
+RS_RM_concatenated_encoding(fq_struct* res, const fq_poly_t f,
+			    const fq_struct* alpha, const int n, const fq_ctx_t ctx,
+			    const int r, const fq_ctx_t ctx_q);
+
+void RS_RM_concatenated_decoding(fq_poly_t res, const fq_struct* c,
+				 const fq_struct* alpha, const int n, const int k, 
+				 const fq_ctx_t ctx, const int r, const fq_ctx_t ctx_q);
+
 #endif // CODES_H

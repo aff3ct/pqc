@@ -53,7 +53,9 @@ RS_decoder(fq_poly_t res, const fq_struct* c, const fq_struct* alpha, const int 
 }
 
 
-/* Decoding algorithm for Generalised Reed-Solomon codes */
+/**
+ * Decoding algorithm for Generalised Reed-Solomon codes
+ */
 int
 GRS_decoder(fq_struct* res, const fq_struct* c, const fq_struct* alpha, const fq_struct* beta,
 	    const int n, const int k, const fq_ctx_t ctx) { 
@@ -298,6 +300,7 @@ RS_encoding(fq_struct* res, const fq_poly_t f, const fq_struct* alpha, const int
     }
 }
 
+
 /**
  * Encoding for Reed-Muller codes of parameters (1, m)
  * IN: alpha is a vector over FF_2
@@ -334,6 +337,44 @@ RM_encoding_duplicated(fq_struct* res, const fq_struct* alpha, const int m, cons
 	    fq_set(&res[i*(1<<m) + j], &tmp_vec[j], ctx);
 	}
     }
+}
+
+
+/**
+ * Encodes with concatenated Reed-Solomon and Reed-Muller codes.
+ * Here `f` is a polynomial in F_2^m[X], `alpha` is a vector of elements in F_2^m,
+ * `n` is the length of the RS code, we are using RM(1, m-1) duplicated `r` times
+ * and `ctx` / `ctx_q` is F_2^m / F_2.
+ */
+void
+RS_RM_concatenated_encoding(fq_struct* res, const fq_poly_t f,
+			    const fq_struct* alpha, const int n, const fq_ctx_t ctx,
+			    const int r, const fq_ctx_t ctx_q) {
+
+    int i, j;
+    int m = fq_ctx_degree(ctx);
+    int len = (1 << (m-1));	/* length of RM(1, m-1) code */
+    
+    /* first use the RS code to encode the message f */
+    fq_struct* tmp_m1 = _fq_vec_init(n, ctx);
+    RS_encoding(tmp_m1, f, alpha, n, ctx);
+
+    
+
+    for (i = 0; i < n; ++i) {
+	/* transform each coordinate of tmp_m1 / F_q^k into a vector in F_q^k */
+	fq_struct* tmp_m2 = _fq_vec_init(m, ctx_q);
+	fq_get_coeffs(tmp_m2, tmp_m1[i], m, ctx, ctx_q);
+
+	/* encode said vector using a duplicated RM code */
+	fq_struct* tmp_m3 = _fq_vec_init(r * len, ctx_q);
+	RM_encoding_duplicated(tmp_m3, tmp_m2, m-1, r, ctx_q);
+
+	for (j = 0; j < r * len; j++) {
+	    fq_set(&res[i * (r*len) + j], &tmp_m3[j], ctx_q);
+	}
+    }
+
 }
 
 
@@ -624,7 +665,9 @@ Bike_decoding_v2(fq_struct* res, const fq_struct* s, const fq_poly_t h0,
  * We are doing it with closest vector : dimensions allow it.
  */
 void
-RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const int r, const fq_ctx_t ctx) {
+RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const int r,
+		       const fq_ctx_t ctx) {
+
     int i, j, k, dist, min_dist, len;
     len = r * (1<<m);
     fq_struct* tmp_m = _fq_vec_init(m + 1, ctx);
@@ -640,17 +683,10 @@ RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const in
 	for (i = 0; i < m+1; i++) {
 	    fq_set_ui(&tmp_m[i], (k>>i)&1, ctx);
 	}
-	/* std::cout << k << std::endl; */
-
-	/* _fq_vec_print_pretty(tmp_m, m+1, ctx); */
-	/* std::cout <<  std::endl; */
 
 	RM_encoding_duplicated(tmp_c, tmp_m, m, r, ctx);
 
-	
 	dist = hamming_distance(c, tmp_c, len, ctx);
-	/* std::cout << dist << " " << min_dist << std::endl; */
-	/* std::cout << std::endl; */
 	    
 	if (dist < min_dist) {
 	    min_dist = dist;
@@ -660,9 +696,48 @@ RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const in
 	if (min_dist == 0) {
 	    break;
 	}
-
-	
     }
+}
 
-   
+
+void RS_RM_concatenated_decoding(fq_poly_t res, const fq_struct* c,
+				 const fq_struct* alpha, const int n, const int k, 
+				 const fq_ctx_t ctx, const int r, const fq_ctx_t ctx_q) {
+
+    int i, j;
+    int m = fq_ctx_degree(ctx);
+    int len = (1 << (m-1));
+    
+    fq_struct* tmp_m2 = _fq_vec_init(m, ctx_q);
+    fq_struct* tmp_c2 = _fq_vec_init(r * len, ctx_q);
+    fmpz* tmp_m3 = _fmpz_vec_init(m);
+    fmpz_poly_t tmp_pol; fmpz_poly_init(tmp_pol);
+
+    fq_struct* tmp_c1 = _fq_vec_init(n, ctx_q);
+    
+    /* will decode each block of r * 2^len bits */
+    for (i = 0; i < n; i++) {
+	/* Decode a block of r*len bits using RM(1, m-1) code */
+	for (j = 0; j < r * len; j++) {
+	    fq_set(&tmp_c2[j], &c[i * r * len + j], ctx_q);
+	}
+	/* printf("After one block \n"); */
+	
+	RM_decoding_duplicated(tmp_m2, tmp_c2, m-1, r, ctx_q);
+	/* printf("After RM decoding of one block \n"); */
+	/* _fq_vec_print_pretty(tmp_m2, m, ctx_q); */
+	
+	/* Then transform the retrieved block in an elt of F_q^m  */
+	_fq_vec_2_fmpz(tmp_m3, tmp_m2, m, ctx_q);
+	fmpz_poly_set_coeffs(tmp_pol, tmp_m3, m);
+	fq_set_fmpz_poly(&tmp_c1[i], tmp_pol, ctx);
+    }
+    
+    RS_decoder(res, tmp_c1, alpha, n, k, ctx);
+
+
+    _fq_vec_clear(tmp_c2, r * len, ctx_q);
+    _fq_vec_clear(tmp_m2, m, ctx_q);
+    _fmpz_vec_clear(tmp_m3, m);
+    fmpz_poly_clear(tmp_pol);
 }
