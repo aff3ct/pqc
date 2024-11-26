@@ -77,6 +77,7 @@ _fmpz_vec_2_fq(fq_struct* res, const fmpz* a, const int len, const fq_ctx_t ctx)
 void
 _fq_vec_2_fmpz(fmpz* res, const fq_struct* a, const int len, const fq_ctx_t ctx);
 
+
 void fq_get_coeffs(fq_struct *res, const fq_struct a, const int m,
                    const fq_ctx_t ctx, const fq_ctx_t ctx_q);
 

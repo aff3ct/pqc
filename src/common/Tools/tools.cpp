@@ -163,7 +163,8 @@ cm_random_indices(int* res, const int n, const int t, const int N, const int tau
     return ind;
 }
 
-void random_bits(int *res, const int len) {
+void
+random_bits(int *res, const int len) {
     int ind = 0;
     int count_loop = 0;
     int a;

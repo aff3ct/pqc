@@ -6,6 +6,10 @@
 
 
 class HQC_secret_key {
+    /* Parameters as in the HQC specification document
+       n is the length, i.e. the degree of X^n - 1
+       w is the hamming weight of the polynomials x, y */
+
 private:
     int n;
     fq_ctx_t* ctx_q;
@@ -22,9 +26,6 @@ public:
     fq_ctx_t* get_ctx_q() const;
 
 
-    /* Parameters as in the HQC specification document
-       n is the length, i.e. the degree of X^n - 1
-       w is the hamming weight of the polynomials x, y */
     void keygen(const int w);
     
 };

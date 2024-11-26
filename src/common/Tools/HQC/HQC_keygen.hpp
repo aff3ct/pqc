@@ -3,4 +3,5 @@
 
 
 void
-HQC_keygen_naive(HQC_secret_key& SK, HQC_public_key& PK, const int w);
+HQC_keygen_naive(HQC_secret_key& SK, HQC_public_key& PK, const int w,
+		 flint_rand_t state);

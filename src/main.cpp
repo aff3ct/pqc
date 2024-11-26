@@ -33,6 +33,10 @@
 #include "Tools/Bike/Bike_public_key.hpp"
 #include "Tools/Bike/Bike_keygen.hpp"
 
+#include "Tools/HQC/HQC_secret_key.hpp"
+#include "Tools/HQC/HQC_public_key.hpp"
+#include "Tools/HQC/HQC_keygen.hpp"
+
 
 #include "Modules/Comparator/Comparator.hpp"
 #include "Modules/SyndComparator/SyndComparator.hpp"
@@ -82,16 +86,21 @@ int main(int argc, char** argv, char** env) {
     int r = 3;			/* number of times the RM code is duplicated */
     int n2 = 1 << (m-1);	/* length of RM(1, m) code */
     int len = r * n1 * n2;
-   
-    /* int len = (1 << m) - 1; */
-    /* int k = len - 10; */
-    /* int t = (len-k)/2; */
 
+    int weight = 66;
+    
+        
     fq_struct* alpha = _fq_vec_init(n1, ctx);
     fq_struct* codeword = _fq_vec_init(len, ctx_q);
     fq_struct* codeword1 = _fq_vec_init(len, ctx_q);
     fq_struct* codeword2 = _fq_vec_init(len, ctx_q);
+    
+    HQC_secret_key SK = HQC_secret_key(len, &ctx_q);
+    HQC_public_key PK = HQC_public_key(len, n1, &ctx, &ctx_q);
+    HQC_keygen_naive(SK, PK, weight, state);
 
+    _fq_vec_print_pretty(PK.alpha, n1, ctx);
+    
     _fq_vec_zero(codeword, len, ctx_q);
     _fq_vec_zero(codeword1, len, ctx_q);
     _fq_vec_zero(codeword2, len, ctx_q);
@@ -123,12 +132,12 @@ int main(int argc, char** argv, char** env) {
     /* fq_struct* res = _fq_vec_init(len * r * _len, ctx_q); */
 
 
-    RS_RM_concatenated_encoding(codeword, message, alpha, n1, ctx, r, ctx_q);
-    _fq_vec_print_pretty(codeword, len, ctx_q);
+    RS_RM_concatenated_encoding(codeword, message, PK.alpha, n1, ctx, r, ctx_q);
+    // _fq_vec_print_pretty(codeword, len, ctx_q);
     
     int ee[len];
     
-    hqc_gen_e(ee, len, 250);
+    hqc_gen_e(ee, len, 7000);
     
     fq_t tmp; fq_init(tmp, ctx_q);
 
@@ -137,15 +146,15 @@ int main(int argc, char** argv, char** env) {
 	fq_add(&codeword1[i], &codeword[i], tmp, ctx_q);
     }
 
-    _fq_vec_print_pretty(codeword1, len, ctx_q);
+    // _fq_vec_print_pretty(codeword1, len, ctx_q);
 
     _fq_vec_add(codeword2, codeword, codeword1, len, ctx_q);
-    _fq_vec_print_pretty(codeword2, len, ctx_q);    
+    // _fq_vec_print_pretty(codeword2, len, ctx_q);    
     
     cout << "hamming distance: " << hamming_distance(codeword, codeword1, len, ctx_q) << endl;
     cout << "hamming weight: " << hamming_weight(codeword2, len, ctx_q) << endl;
     
-    RS_RM_concatenated_decoding(res, codeword1, alpha, n1, k, ctx, r, ctx_q);
+    RS_RM_concatenated_decoding(res, codeword1, PK.alpha, n1, k, ctx, r, ctx_q);
 
     int b = fq_poly_print_pretty(message, "T", ctx);
     cout << endl;
@@ -160,8 +169,6 @@ int main(int argc, char** argv, char** env) {
     
     /* _fq_vec_print_pretty(message, len, ctx_q); */
     
-
-
     // for (int _i = 0; _i < 10; _i++) {
     // 	fq_vec_rand(aa, _k, ctx_q, state);
     // 	_fq_vec_print_pretty(aa, _k, ctx_q);
@@ -194,8 +201,8 @@ int main(int argc, char** argv, char** env) {
     // /*                                TESTS FOR BIKE                             */
     // /* ************************************************************************* */
 
-    // /* !! needs r such that 2 is primitive mod r !!  */
-    // /* int r = random_suitable_integer(6); */
+    /* !! needs r such that 2 is primitive mod r !!  */
+    /* int r = random_suitable_integer(6); */
 
 
     // int level = 5;
@@ -227,8 +234,8 @@ int main(int argc, char** argv, char** env) {
 
     
     // Bike_secret_key SK = Bike_secret_key(SYND_SIZE, &ctx_q);
-    // Bike_public_key PK = Bike_public_key(SYND_SIZE, &ctx_q);
-    // Bike_keygen_naive(SK, PK, weight);
+    /* Bike_public_key PK = Bike_public_key(SYND_SIZE, &ctx_q); */
+    /* Bike_keygen_naive(SK, PK, weight); */
 
     
     // module::Initializer   <int> initializer(FRAME_SIZE);

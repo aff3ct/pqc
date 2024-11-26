@@ -38,6 +38,7 @@ HQC_secret_key::get_ctx_q() const {
 
 void
 HQC_secret_key::keygen(const int w) {
+    
     int e[this->n];
     
     for (int i = 0 ; i < n; ++i) {

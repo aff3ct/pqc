@@ -45,9 +45,3 @@ CM_secret_key:: keygen(const int d, flint_rand_t state) {
     cm_fq_poly_irr_pol(this->g, d, this->alpha, this->n, *(this->ctx),
 		       state);
 }
-
-
-// fq_poly_t&
-// CM_secret_key:: get_g() const {
-//     return g;
-// }
