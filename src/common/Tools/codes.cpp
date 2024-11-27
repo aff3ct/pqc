@@ -326,10 +326,12 @@ RM_encoding(fq_struct* res, const fq_struct* alpha, const int m, const fq_ctx_t 
 /**
  * Encoding for duplicated Reed-Muller codes of parameters (1, m)
  * IN: alpha is a vector over FF_2
- * OUT: vector of 1 + sum_{0 < i < m} alpha_i *  X_i evaluated in all elements of FF_2^n duplicated r times
+ * OUT: vector of 1 + sum_{0 < i < m} alpha_i *  X_i evaluated in all elements of FF_2^n
+ * duplicated r times
  */
 void
-RM_encoding_duplicated(fq_struct* res, const fq_struct* alpha, const int m, const int r, const fq_ctx_t ctx) {
+RM_encoding_duplicated(fq_struct* res, const fq_struct* alpha, const int m, const int r,
+		       const fq_ctx_t ctx) {
     fq_struct* tmp_vec = _fq_vec_init(1<<m, ctx);
     RM_encoding(tmp_vec, alpha, m, ctx);
     for (int i = 0; i < r; ++i) {
@@ -369,7 +371,7 @@ RS_RM_concatenated_encoding(fq_struct* res, const fq_poly_t f,
 	/* encode said vector using a duplicated RM code */
 	fq_struct* tmp_m3 = _fq_vec_init(r * len, ctx_q);
 	RM_encoding_duplicated(tmp_m3, tmp_m2, m-1, r, ctx_q);
-
+	
 	for (j = 0; j < r * len; j++) {
 	    fq_set(&res[i * (r*len) + j], &tmp_m3[j], ctx_q);
 	}
@@ -456,6 +458,78 @@ Bike_encoding(fq_poly_t res, const int* e, const fq_poly_t h, const int r, const
 }
 
 
+/**
+ * Encoding as in HQC
+ */
+void
+HQC_encoding( fq_poly_t res1, fq_poly_t res2, const fq_poly_t m, const fq_poly_t h,
+	     const fq_poly_t s, const fq_struct* alpha, const int n, const int k,
+	     const int n1, const int r, const int we, const int wr,
+	      const fq_ctx_t ctx, const fq_ctx_t ctx_q, flint_rand_t state) {
+
+    int _m = fq_ctx_degree(ctx);
+    int len = (1 << (_m - 1));	/* length of RM(1, m-1) code */
+    
+    fq_struct* tmp_vec = _fq_vec_init(n, ctx_q);
+    fq_struct* tmp_vec_2 = _fq_vec_init(r * n1 * len, ctx_q);
+    fq_poly_t tmp_pol; fq_poly_init(tmp_pol, ctx_q);
+    
+    fq_poly_t r1; fq_poly_init(r1, ctx_q);
+    fq_poly_t r2; fq_poly_init(r2, ctx_q);
+    fq_poly_t P; fq_poly_init(P, ctx_q); 
+    fq_poly_set_cyclic(P, n, ctx_q);
+    
+    int v[n];
+    
+    /* computes r1, r2 with fixed weight `wr`  */
+    for (int i = 0 ; i < n; ++i) {
+	v[i] = 0;
+    }
+    hqc_gen_e(v, n, wr);	/* r1 */
+    
+    _int_vec_2_fq(tmp_vec, v, n, ctx_q);
+    fq_poly_set_coeffs(r1, tmp_vec, n, ctx_q);
+    
+    for (int i = 0 ; i < n; ++i) {
+	v[i] = 0;
+    }
+    _fq_vec_zero(tmp_vec, n, ctx_q);
+    hqc_gen_e(v, n, wr);	/* r2 */
+    _int_vec_2_fq(tmp_vec, v, n, ctx_q);
+    fq_poly_set_coeffs(r2, tmp_vec, n, ctx_q);
+    
+    /* put the result of r1 + h * r2 into res1 */
+    fq_poly_mulmod(res1, h, r2, P, ctx_q);
+    fq_poly_add(res1, res1, r1, ctx_q);
+
+    fq_poly_mulmod(res2, s, r2, P, ctx_q);
+    
+    _fq_vec_zero(tmp_vec_2, r*len*n1,  ctx_q); fq_poly_zero(tmp_pol, ctx_q);
+    RS_RM_concatenated_encoding(tmp_vec_2, m, alpha, n1, ctx, r, ctx_q);
+    fq_poly_set_coeffs(tmp_pol, tmp_vec_2, r*len*n1, ctx_q);
+   
+    fq_poly_add(res2, res2, tmp_pol, ctx_q);
+
+    /* computes e with fixed weight `we`  */
+    for (int i = 0 ; i < n; ++i) {
+	v[i] = 0;
+    }
+    _fq_vec_zero(tmp_vec, n, ctx_q); fq_poly_zero(tmp_pol, ctx_q);
+    hqc_gen_e(v, n, we);
+    _int_vec_2_fq(tmp_vec, v, n, ctx_q);
+    fq_poly_set_coeffs(tmp_pol, tmp_vec, n, ctx_q);
+    fq_poly_add(res2, res2, tmp_pol, ctx_q);
+    
+    fq_poly_truncate(res2, r*len*n1, ctx_q);
+     
+    
+    /* clear memory */
+    fq_poly_clear(tmp_pol, ctx_q);
+    fq_poly_clear(P, ctx_q);
+    fq_poly_clear(r1, ctx_q);
+    fq_poly_clear(r2, ctx_q);
+    _fq_vec_clear(tmp_vec, n, ctx_q);
+}
 
 /* **************************************************************************** */
 /*                                   DECODERS                                   */
@@ -700,7 +774,8 @@ RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const in
 }
 
 
-void RS_RM_concatenated_decoding(fq_poly_t res, const fq_struct* c,
+void
+RS_RM_concatenated_decoding(fq_poly_t res, const fq_struct* c,
 				 const fq_struct* alpha, const int n, const int k, 
 				 const fq_ctx_t ctx, const int r, const fq_ctx_t ctx_q) {
 
@@ -740,4 +815,31 @@ void RS_RM_concatenated_decoding(fq_poly_t res, const fq_struct* c,
     _fq_vec_clear(tmp_m2, m, ctx_q);
     _fmpz_vec_clear(tmp_m3, m);
     fmpz_poly_clear(tmp_pol);
+}
+
+
+void
+HQC_decoding(fq_poly_t res, const fq_poly_t u, const fq_poly_t v, const fq_poly_t y,
+	     const fq_struct* alpha, const int n, const int n1, const int k, const int r,
+	     const fq_ctx_t ctx, const fq_ctx_t ctx_q) {
+
+    int _m = fq_ctx_degree(ctx);
+    int len = (1 << (_m - 1));	/* length of RM(1, m-1) code */
+    
+    fq_poly_t P; fq_poly_init(P, ctx_q); 
+    fq_poly_set_cyclic(P, n, ctx_q);
+
+    fq_struct* tmp_vec = _fq_vec_init(r*len*n1, ctx_q); _fq_vec_zero(tmp_vec, r*len*n1, ctx_q);
+    fq_poly_t tmp_poly; fq_poly_init(tmp_poly, ctx_q); fq_poly_zero(tmp_poly, ctx_q);
+    fq_poly_mulmod(tmp_poly, u, y, P, ctx_q);
+    fq_poly_add(tmp_poly, tmp_poly, v, ctx_q);
+    fq_poly_truncate(tmp_poly, r*len*n1, ctx_q);
+    fq_poly_get_coeffs(tmp_vec, tmp_poly, r*len*n1, ctx_q);    
+    
+
+    RS_RM_concatenated_decoding(res, tmp_vec, alpha, n1, k, ctx, r, ctx_q);
+
+    fq_poly_clear(P, ctx_q);
+    fq_poly_clear(tmp_poly, ctx_q);
+    _fq_vec_clear(tmp_vec, r*len*n1, ctx_q);
 }

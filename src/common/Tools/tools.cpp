@@ -276,6 +276,7 @@ _fq_vec_2_int(int* res, const fq_struct* a, const int len, const fq_ctx_t ctx) {
 */
 void
 _int_vec_2_fq(fq_struct* res, const int* a, const int len, const fq_ctx_t ctx) {
+    _fq_vec_zero(res, len, ctx);
     for (int i = 0 ; i < len; ++i) {
 	fq_set_ui(&res[i], a[i], ctx);
     }
@@ -400,6 +401,7 @@ fq_vec_expand(fq_struct *res, const fq_struct *v, const int len1, const int len2
 void
 fq_poly_set_coeffs(fq_poly_t f, const fq_struct* alpha, const int len,
 		   const fq_ctx_t ctx) {
+    fq_poly_zero(f, ctx);
     for (int i = 0; i < len; i++) {
 	fq_poly_set_coeff(f, i, &alpha[i], ctx);
     }

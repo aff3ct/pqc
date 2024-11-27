@@ -52,7 +52,7 @@ HQC_public_key:: get_ctx() const {
 
 void
 HQC_public_key::keygen(const HQC_secret_key& sk, flint_rand_t state) {
-    /* init P and set it o X^n-1 */
+    /* init P and set it to X^n-1 */
     fq_poly_t P; fq_poly_init(P, *(this->ctx_q)); 
     fq_poly_set_cyclic(P, this->n, *(this->ctx_q));
     
@@ -67,9 +67,10 @@ HQC_public_key::keygen(const HQC_secret_key& sk, flint_rand_t state) {
     random_bits(e, this->n);
     _int_vec_2_fq(tmp, e, this->n, *(this->ctx_q));
     fq_poly_set_coeffs(this->h, tmp, n, *(this->ctx_q));
-
+    
     /* Computes s = x + h*y */
-    fq_poly_mulmod(s, this->h, sk.y, P, *(this->ctx_q));
+    fq_poly_zero(this->s, *(this->ctx_q));
+    fq_poly_mulmod(this->s, this->h, sk.y, P, *(this->ctx_q));
     fq_poly_add(this->s, this->s, sk.x, *(this->ctx_q));
 
     /* Now computes elements of F_2^m for RS code */

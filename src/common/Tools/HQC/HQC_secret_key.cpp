@@ -41,7 +41,7 @@ HQC_secret_key::keygen(const int w) {
     
     int e[this->n];
     
-    for (int i = 0 ; i < n; ++i) {
+    for (int i = 0 ; i < this->n; ++i) {
 	e[i] = 0;
     }
 
@@ -50,15 +50,16 @@ HQC_secret_key::keygen(const int w) {
     // x
     hqc_gen_e(e, this->n, w);
     _int_vec_2_fq(tmp, e, this->n, *(this->ctx_q));
-    fq_poly_set_coeffs(this->x, tmp, n, *(this->ctx_q));
+    fq_poly_set_coeffs(this->x, tmp, this->n, *(this->ctx_q));
 
     // y
-    for (int i = 0 ; i < n; ++i) {
+    for (int i = 0 ; i < this->n; ++i) {
 	e[i] = 0;
     }
     hqc_gen_e(e, this->n, w);
+    _fq_vec_zero(tmp, this->n, *(this->ctx_q));
     _int_vec_2_fq(tmp, e, this->n, *(this->ctx_q));
-    fq_poly_set_coeffs(this->y, tmp, n, *(this->ctx_q));
+    fq_poly_set_coeffs(this->y, tmp, this->n, *(this->ctx_q));
 
-    _fq_vec_clear(tmp, n, *(this->ctx_q));
+    _fq_vec_clear(tmp, this->n, *(this->ctx_q));
 }
