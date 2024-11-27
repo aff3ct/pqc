@@ -68,7 +68,7 @@ void
 HQC_encoding(fq_poly_t res1, fq_poly_t res2, const fq_poly_t m, const fq_poly_t h,
 	     const fq_poly_t s, const fq_struct* alpha, const int n, const int k,
 	     const int n1, const int r, const int we, const int wr,
-	     const fq_ctx_t ctx, const fq_ctx_t ctx_q, flint_rand_t state);
+	     const fq_ctx_t ctx, const fq_ctx_t ctx_q);
 
 // DECODER
 int
