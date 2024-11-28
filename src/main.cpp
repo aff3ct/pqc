@@ -38,6 +38,7 @@
 #include "Tools/HQC/HQC_keygen.hpp"
 
 
+#include "Modules/RandomVector/RandomVector.hpp"
 #include "Modules/Comparator/Comparator.hpp"
 #include "Modules/SyndComparator/SyndComparator.hpp"
 #include "Modules/CM_RandomFixedWeight/CM_RandomFixedWeight.hpp"
@@ -186,15 +187,19 @@ int main(int argc, char** argv, char** env) {
     module::Finalizer     <int> finalizer(FRAME_SIZE);
     
     module::Comparator comp(FRAME_SIZE);
-    module::HQC_Encoder hqc_encode(PK);
-    module::HQC_Decoder hqc_decode(WEIGHT, NBITER, TAU, SK);
+    module::RandomVector random_vector(FRAME_SIZE);
+    module::HQC_Encoder hqc_encode(PK, FRAME_SIZE, CODE_LENGTH, R, ERROR_WEIGHT);
+    module::HQC_Decoder hqc_decode(SK, PK, FRAME_SIZE, CODE_LENGTH, R);
+    
 
     
-    initializer   ["initialize::out" ] = randfixed   ["random_fixed_weight::input"];
-    randfixed   ["random_fixed_weight::output" ] = hqc_encode   ["hqc_encoder::input"];
-    hqc_encode ["hqc_encoder::output"] = hqc_decode ["hqc_decoder::input"];
+    initializer   ["initialize::out" ] = random_vector   ["random_vector::input"];
+    random_vector   ["random_vector::output" ] = hqc_encode   ["hqc_encoder::input"];
+    hqc_encode ["hqc_encoder::output1"] = hqc_decode ["hqc_decoder::input1"];
+    hqc_encode ["hqc_encoder::output2"] = hqc_decode ["hqc_decoder::input2"];
+
     hqc_decode ["hqc_decoder::output"] = comp ["compare::input1"];
-    randfixed   ["random_fixed_weight::output" ]= comp ["compare::input2"];
+    random_vector   ["random_vector::output" ] = comp ["compare::input2"];
     comp ["compare::output"] = finalizer ["finalize::in"  ];
 
 

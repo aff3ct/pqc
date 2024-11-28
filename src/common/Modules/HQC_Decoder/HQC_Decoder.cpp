@@ -18,7 +18,7 @@ HQC_Decoder:: HQC_Decoder(HQC_secret_key& SK, HQC_public_key& PK, int k, int len
 
     auto &t = create_task("hqc_decoder");
     auto input1   = create_socket_in<int>(t, "input1", input_size1);
-    auto input2  = create_socket_out<int>(t, "input2", input_size2);
+    auto input2  = create_socket_in<int>(t, "input2", input_size2);
     auto output  = create_socket_out<int>(t, "output", output_size);
 
     this->create_codelet(t, [input1, input2, output, &PK, &SK](Module &m, runtime::Task &t,
@@ -48,7 +48,7 @@ HQC_Decoder:: hqc_decoder(int* input1, int* input2, int* output, const HQC_secre
     /* temporary poly for computation */
     fq_poly_t res; fq_poly_init(res, *ctx_q);    fq_poly_zero(res, *ctx_q);
     fq_poly_t in1; fq_poly_init(in1, *ctx_q); fq_poly_zero(in1, *ctx_q);
-    fq_poly_t in2; fq_poly_init(in1, *ctx_q);  fq_poly_zero(in1, *ctx_q);
+    fq_poly_t in2; fq_poly_init(in2, *ctx_q);  fq_poly_zero(in2, *ctx_q);
     
     /* temporary vectors for conversion between F_2 and int values */
     fq_struct* tmp_vec = _fq_vec_init(this->output_size, *ctx_q);
@@ -68,14 +68,18 @@ HQC_Decoder:: hqc_decoder(int* input1, int* input2, int* output, const HQC_secre
     _int_vec_2_fq(tmp_vec2, input2, this->input_size2, *ctx_q);
     fq_poly_set_coeffs(in2, tmp_vec2, this->input_size2, *ctx_q);
 
+    printf("just before decoding \n");
     
     /* decoding */
     HQC_decoding(res, in1, in2, SK.y, PK.alpha, this->input_size1, PK.get_n1(),
 		 this->output_size, this->r, *ctx, *ctx_q);
+
+    printf("just after decoding \n");
     
     /* put it in vec format */
     fq_poly_get_coeffs(tmp_vec, res, this->output_size, *ctx_q);
-    
+
+    printf("just before conversion \n");
     /* reverse conversion F_2 to int */
     _fq_vec_2_int(output, tmp_vec, this->output_size, *ctx_q);
 

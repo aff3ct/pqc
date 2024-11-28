@@ -13,7 +13,7 @@
  * Decoding algorithm for Reed-Solomon codes
  * Decode received message c wrt to RS_k(alpha)
 */
-int
+ int
 RS_decoder(fq_poly_t res, const fq_struct* c, const fq_struct* alpha, const int n, const int k,
 	   const fq_ctx_t ctx) {
 
