@@ -199,6 +199,9 @@ BFMaskedIterv2(fq_poly_t e0, fq_poly_t e1, const fq_poly_t sp, const int* pos0,
 
 
 void
+CM_params(int &m, int &n, int &t, const int level);
+
+void
 Bike_params(int& r, int& weight, int& error_weight, const int level);
 
 
@@ -206,5 +209,8 @@ void
 BGF_params(int& NbIter, int& tau, const int level);
 
 
+void
+HQC_params(int& k, int &n1, int &n2, int &r, int &n, int &w, int &we, int &wr,
+	   const int level);
 
 #endif // TOOLS_H

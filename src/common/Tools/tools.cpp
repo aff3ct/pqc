@@ -921,6 +921,28 @@ BFMaskedIterv2(fq_poly_t e0, fq_poly_t e1, const fq_poly_t sp, const int* pos0,
 }
 
 /**
+ * Short: Computes CM parameters as in the specification document.
+ */
+void
+CM_params(int& m, int& n, int& t, const int level) {
+    if (level == 1) {		/* mceliece348864 */
+	m = 12;
+	n = 3488;
+	t = 64;
+    } else if (level == 3) {	/* mceliece6688128 */
+	m = 13;			
+	n = 6688;
+	t = 128;
+    } else if (level == 5) {	/* mceliece8192128 */
+	m = 13;
+	n = 8192;
+	t = 128;
+    }
+}
+
+
+
+/**
  * Short: Computes BIKE parameters as in the specification document.
  */
 void
@@ -955,5 +977,42 @@ BGF_params(int& NbIter, int& tau, const int level) {
     } else if (level == 5) {
 	NbIter = 5;
 	tau = 3;
+    }
+}
+
+
+/**
+ * Short: Computes HQC parameters `almost` as in the specification document.
+ */
+void
+HQC_params(int& k, int& n1, int& n2, int& r, int& n, int& w, int& we, int &wr,
+	   const int level) {
+    if (level == 1) {
+	k = 16;
+	n1 = 46;
+	n2 = 128;
+	r = 3;
+	n = 17669;
+	w = 66;
+	we = 75;
+	wr = 75;
+    } else if (level == 3) {
+	k = 24;
+	n1 = 56;
+	n2 = 128;
+	r = 5;
+	n = 35851;
+	w = 100;
+	we = 114;
+	wr = 114;
+    } else if (level == 5) {
+	k = 32;
+	n1 = 90;
+	n2 = 128;
+	r = 5;
+	n = 57637;
+	w = 131;
+	we = 149;
+	wr = 149;
     }
 }
