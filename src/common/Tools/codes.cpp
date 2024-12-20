@@ -1,4 +1,5 @@
 #include "codes.hpp"
+#include <flint/fq.h>
 #include <iostream>
 #include <flint/fq_mat.h>
 
@@ -320,7 +321,9 @@ RM_encoding(fq_struct* res, const fq_struct* alpha, const int m, const fq_ctx_t 
 	     fq_add(tmp, tmp, tmp1, ctx);
 	 }
 	 fq_set(&res[i], tmp, ctx);
-    }  
+    }
+    fq_clear(tmp, ctx);
+    fq_clear(tmp1, ctx);
 }
 
 /**
@@ -339,6 +342,7 @@ RM_encoding_duplicated(fq_struct* res, const fq_struct* alpha, const int m, cons
 	    fq_set(&res[i*(1<<m) + j], &tmp_vec[j], ctx);
 	}
     }
+    _fq_vec_clear(tmp_vec, 1<<m, ctx);
 }
 
 
@@ -362,14 +366,17 @@ RS_RM_concatenated_encoding(fq_struct* res, const fq_poly_t f,
     RS_encoding(tmp_m1, f, alpha, n, ctx);
 
     
+    fq_struct* tmp_m2 = _fq_vec_init(m, ctx_q);
+    fq_struct* tmp_m3 = _fq_vec_init(r * len, ctx_q);
 
     for (i = 0; i < n; ++i) {
+	_fq_vec_zero(tmp_m2, m, ctx_q);
+	_fq_vec_zero(tmp_m3, r*len, ctx_q);
+	
 	/* transform each coordinate of tmp_m1 / F_q^k into a vector in F_q^k */
-	fq_struct* tmp_m2 = _fq_vec_init(m, ctx_q);
 	fq_get_coeffs(tmp_m2, tmp_m1[i], m, ctx, ctx_q);
 
 	/* encode said vector using a duplicated RM code */
-	fq_struct* tmp_m3 = _fq_vec_init(r * len, ctx_q);
 	RM_encoding_duplicated(tmp_m3, tmp_m2, m-1, r, ctx_q);
 	
 	for (j = 0; j < r * len; j++) {
@@ -377,6 +384,9 @@ RS_RM_concatenated_encoding(fq_struct* res, const fq_poly_t f,
 	}
     }
 
+    _fq_vec_clear(tmp_m1, n, ctx);
+    _fq_vec_clear(tmp_m2, m, ctx_q);
+    _fq_vec_clear(tmp_m3, r*len, ctx_q);
 }
 
 
@@ -771,6 +781,9 @@ RM_decoding_duplicated(fq_struct* res, const fq_struct* c, const int m, const in
 	    break;
 	}
     }
+
+    _fq_vec_clear(tmp_m, m+1, ctx);
+    _fq_vec_clear(tmp_c, len, ctx);
 }
 
 

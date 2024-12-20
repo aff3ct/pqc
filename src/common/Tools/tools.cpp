@@ -2,17 +2,6 @@
 #include <random>
 
 
-/* #include <flint/flint.h> */
-/* #include <flint/fmpz.h>		/\* large integers *\/ */
-/* #include <flint/fq.h>		/\* finite fields *\/ */
-
-/* #include "flint/fq_poly.h"	/\* pol. in finite fields *\/ */
-/* #include "flint/fmpz_poly.h"	/\* pol. in integers *\/ */
-/* #include "flint/fmpz_vec.h"	/\* vectors integers *\/ */
-/* #include "flint/fq_vec.h"	/\* vectors finite fields *\/ */
-/* #include "flint/perm.h"		/\* permutations *\/ */
-/* #include "flint/fq_mat.h"	/\* matrix / finite fields *\/ */
-
 
 #include "tools.hpp"
 
@@ -49,13 +38,18 @@ random_suitable_integer(const int len) {
 
 /**
  * Computes the threshold for the BGF algo.
- * Ad-hoc definition
+ * Use hard-coded values from Bike spec.
  * TODO: find a better definition
  */
 int
 compute_threshold(const int w, const int ind, const int r) {
-    // return std::max(.2*w + 1.*r/2-7, 1.*r/2-5);
-    return std::max(0.0069722*w + 13.530, 36.);
+    if (r == 12323) {
+	return std::max(0.0069722*w + 13.530, 36.);
+    } else if (r == 24659) {
+	return std::max(0.005265*w + 15.2588, 52.);
+    } else {
+	return std::max(0.00402312*w + 17.8785, 69.);
+    }
 }
 
 
