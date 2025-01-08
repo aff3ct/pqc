@@ -31,10 +31,9 @@ include(FindPkgConfig)
 pkg_check_modules(FLINT flint)
 
 # include(FindPackageHandleStandardArgs)
-link_libraries(${pkgcfg_lib_FLINT_flint} ${pkgcfg_lib_FLINT_gmp} ${pkgcfg_lib_FLINT_flint_mpfr})
-
-include_directories("/usr/local/include/flint")
-
+link_libraries(${FLINT_LIBRARIES})
+link_directories(${FLINT_LIBRARY_DIRS})
+include_directories(${FLINT_INCLUDE_DIRS})
 
 #
 file(GLOB_RECURSE COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/common/*)
