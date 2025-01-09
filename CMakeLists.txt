@@ -31,22 +31,20 @@ link_libraries(spu-static-lib)
 # ##########
 
 # Flint Library
-include(FindPkgConfig)
-pkg_check_modules(FLINT flint)
-
-link_libraries(${FLINT_LIBRARIES})
-link_directories(${FLINT_LIBRARY_DIRS})
-include_directories(${FLINT_INCLUDE_DIRS})
+find_package(PkgConfig)
+pkg_check_modules(FLINT REQUIRED flint)
 
 # pqc lib
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/common)
-
 file(GLOB_RECURSE COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/common/*)
 add_library(pqc-static-lib STATIC ${COMMON_SRC})
 
+target_include_directories(pqc-static-lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/common)
+target_link_libraries(pqc-static-lib ${FLINT_STATIC_LIBRARIES})
+target_link_options(pqc-static-lib PUBLIC ${FLINT_STATIC_LDFLAGS})
+
 # Examples
 add_executable(pqc-example ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
-target_link_libraries(pqc-example PRIVATE pqc-static-lib)
+target_link_libraries(pqc-example pqc-static-lib)
 
 add_executable(pqc-bike ${CMAKE_CURRENT_SOURCE_DIR}/src/main_bike.cpp)
 target_link_libraries(pqc-bike PRIVATE pqc-static-lib)
