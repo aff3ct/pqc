@@ -5,7 +5,7 @@ using namespace spu;
 using namespace spu::module;
 
 CM_RandomFixedWeight::CM_RandomFixedWeight(int frame_size, int weight, int N, int tau) :
-    Module(),
+    Stateful(),
     frame_size(frame_size),
     weight(weight),
     N(N),

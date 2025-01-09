@@ -15,7 +15,7 @@ namespace spu
     namespace module
     {
 
-	class HQC_Encoder  : public Module {      
+	class HQC_Encoder  : public Stateful {      
 
       
 	private:

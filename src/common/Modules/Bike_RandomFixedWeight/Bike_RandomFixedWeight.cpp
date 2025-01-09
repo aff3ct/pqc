@@ -4,7 +4,7 @@ using namespace spu;
 using namespace spu::module;
 
 Bike_RandomFixedWeight::Bike_RandomFixedWeight(int frame_size, int weight) :
-    Module(),
+    Stateful(),
     frame_size(frame_size),
     weight(weight) {
 

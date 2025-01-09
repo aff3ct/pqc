@@ -7,7 +7,7 @@ using namespace std;
 
 HQC_Decoder:: HQC_Decoder(HQC_secret_key& SK, HQC_public_key& PK, int k, int len,
 			  int r) :
-    Module(),
+    Stateful(),
     input_size1(PK.get_n()),
     input_size2(len),
     output_size(k),

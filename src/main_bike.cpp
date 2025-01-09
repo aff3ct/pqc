@@ -62,12 +62,15 @@ int main(int argc, char** argv, char** env) {
     /* ************************************************************************* */
 
     // !! needs r such that 2 is primitive mod r !!
+#if 1
     int r = random_suitable_integer(6);
+#else
+    int r = 0;
+#endif
 
     int level = 5;
 
     
-    int r = 0;
     int weight = 0;
     int error_weight = 0;
     int NbIter = 0;

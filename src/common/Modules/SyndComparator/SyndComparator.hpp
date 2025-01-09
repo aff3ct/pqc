@@ -8,7 +8,7 @@ namespace spu
     namespace module
     {
 
-	class SyndComparator  : public Module {
+	class SyndComparator  : public Stateful {
 
 	private:
     

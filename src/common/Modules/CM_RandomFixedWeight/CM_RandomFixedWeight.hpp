@@ -11,7 +11,7 @@ namespace spu
   namespace module
   {
 
-    class CM_RandomFixedWeight  : public Module {      
+    class CM_RandomFixedWeight  : public Stateful {      
   
     private:
     

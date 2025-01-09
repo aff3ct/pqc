@@ -15,7 +15,7 @@ namespace spu
     namespace module
     {
 
-	class HQC_Decoder  : public Module {      
+	class HQC_Decoder  : public Stateful {      
 
       
 	private:

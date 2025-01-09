@@ -5,7 +5,7 @@ using namespace spu;
 using namespace spu::module;
 
 RandomFixedWeight::RandomFixedWeight(int frame_size, int weight, int N, int tau) :
-    Module(),
+    Stateful(),
     frame_size(frame_size),
     weight(weight),
     N(N),
@@ -61,7 +61,7 @@ void RandomFixedWeight::random_fixed_weight(int* input, int* output, const int f
 // using namespace spu;
 // using namespace spu::module;
 
-// MySource::MySource(int frame_size) : Module(), frame_size(frame_size) {
+// MySource::MySource(int frame_size) : Stateful(), frame_size(frame_size) {
 
 //   this->set_name("MySource");
 //   this->set_short_name("MySource");

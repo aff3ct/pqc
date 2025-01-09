@@ -8,7 +8,7 @@ namespace spu
     namespace module
     {
 
-	class Comparator  : public Module {
+	class Comparator  : public Stateful {
 
 	private:
     

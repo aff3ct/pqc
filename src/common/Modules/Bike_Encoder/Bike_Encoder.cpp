@@ -6,7 +6,7 @@ using namespace spu::module;
 using namespace std;
 
 Bike_Encoder:: Bike_Encoder(Bike_public_key& PK) :
-    Module(),
+    Stateful(),
     frame_size(2*PK.get_r()),
     output_size(PK.get_r()) {
 

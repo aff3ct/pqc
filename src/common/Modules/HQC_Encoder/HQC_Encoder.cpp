@@ -6,7 +6,7 @@ using namespace spu::module;
 using namespace std;
 
 HQC_Encoder:: HQC_Encoder(HQC_public_key& PK,  int k,  int len, int r, int w) :
-    Module(),
+    Stateful(),
     frame_size(k),
     output_size1(PK.get_n()),
     output_size2(len),

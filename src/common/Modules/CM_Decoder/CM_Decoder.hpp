@@ -14,7 +14,7 @@ namespace spu
     namespace module
     {
 
-	class CM_Decoder  : public Module {      
+	class CM_Decoder  : public Stateful {      
 
       
 	private:

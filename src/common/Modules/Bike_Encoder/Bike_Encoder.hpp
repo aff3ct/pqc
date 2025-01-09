@@ -15,7 +15,7 @@ namespace spu
     namespace module
     {
 
-	class Bike_Encoder  : public Module {      
+	class Bike_Encoder  : public Stateful {      
 
       
 	private:

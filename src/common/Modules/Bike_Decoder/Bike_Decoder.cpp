@@ -6,7 +6,7 @@ using namespace spu::module;
 using namespace std;
 
 Bike_Decoder:: Bike_Decoder(int weight, int NbIter, int tau, Bike_secret_key& SK) :
-    Module(),
+    Stateful(),
     frame_size(2*SK.get_r()),
     input_size(SK.get_r()),
     weight(weight),

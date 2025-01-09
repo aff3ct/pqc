@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-project (proj LANGUAGES CXX)
+project (pqc LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-
 
 # ##########
 # streampu
@@ -24,36 +23,37 @@ else()
                         "$ git submodule update --init --recursive")
 endif()
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/streampu/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/streampu/lib/rang/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/streampu/lib/cpptrace/include)
+link_libraries(spu-static-lib)
 
-# # ##########
-# Flint
+# ##########
+
+# Flint Library
 include(FindPkgConfig)
 pkg_check_modules(FLINT flint)
 
-# include(FindPackageHandleStandardArgs)
 link_libraries(${FLINT_LIBRARIES})
 link_directories(${FLINT_LIBRARY_DIRS})
 include_directories(${FLINT_INCLUDE_DIRS})
 
-#
+# pqc lib
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/common)
+
 file(GLOB_RECURSE COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/common/*)
-add_library(libcomp STATIC ${COMMON_SRC})
-target_include_directories(libcomp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/common)
-target_link_libraries(libcomp PRIVATE spu-static-lib)
+add_library(pqc-static-lib STATIC ${COMMON_SRC})
 
-add_executable(proj ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
-target_link_libraries(proj PRIVATE libcomp)
-target_link_libraries(proj PRIVATE spu-static-lib)
-target_include_directories(proj PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/common)
+# Examples
+add_executable(pqc-example ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+target_link_libraries(pqc-example PRIVATE pqc-static-lib)
 
+add_executable(pqc-bike ${CMAKE_CURRENT_SOURCE_DIR}/src/main_bike.cpp)
+target_link_libraries(pqc-bike PRIVATE pqc-static-lib)
 
+add_executable(pqc-cm ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cm.cpp)
+target_link_libraries(pqc-cm PRIVATE pqc-static-lib)
 
-
-# # Check for StarPU
-# if (NOT STARPU_FIND_VERSION)
-#   set (STARPU_FIND_VERSION "1.3")
-#   message(STATUS "Checking for StarPU-${STARPU_FIND_VERSION} [default]")
-# else()
-#   message(STATUS "Checking for StarPU-${STARPU_FIND_VERSION}")
-# endif()
+add_executable(pqc-hqc ${CMAKE_CURRENT_SOURCE_DIR}/src/main_hqc.cpp)
+target_link_libraries(pqc-hqc PRIVATE pqc-static-lib)
 

@@ -4,7 +4,7 @@
 using namespace spu;
 using namespace spu::module;
 
-Comparator::Comparator(int frame_size) : Module(), frame_size(frame_size) {
+Comparator::Comparator(int frame_size) : Stateful(), frame_size(frame_size) {
 
   this->set_name("Comparator");
   this->set_short_name("Comparator");

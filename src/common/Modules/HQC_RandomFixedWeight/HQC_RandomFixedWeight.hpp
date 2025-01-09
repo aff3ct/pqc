@@ -11,7 +11,7 @@ namespace spu
   namespace module
   {
 
-      class HQC_RandomFixedWeight  : public Module {      
+      class HQC_RandomFixedWeight  : public Stateful {      
   
       private:
     

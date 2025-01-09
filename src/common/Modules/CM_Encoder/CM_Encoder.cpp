@@ -6,7 +6,7 @@ using namespace spu::module;
 using namespace std;
 
 CM_Encoder:: CM_Encoder(int frame_size, int out_size, CM_public_key& PK) :
-    Module(),
+    Stateful(),
     frame_size(frame_size),
     out_size(out_size) {
 

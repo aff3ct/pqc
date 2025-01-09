@@ -5,7 +5,7 @@ using namespace spu;
 using namespace spu::module;
 
 SyndComparator::SyndComparator(int frame_size, int synd_size) :
-    Module(),
+    Stateful(),
     frame_size(frame_size),
     synd_size(synd_size) {
 

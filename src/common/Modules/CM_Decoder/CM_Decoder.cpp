@@ -6,7 +6,7 @@ using namespace spu::module;
 using namespace std;
 
 CM_Decoder:: CM_Decoder(int frame_size, int synd_size, int weight, CM_secret_key& SK) :
-    Module(),
+    Stateful(),
     frame_size(frame_size),
     synd_size(synd_size),
     weight(weight) {

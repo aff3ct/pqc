@@ -5,7 +5,7 @@ using namespace spu;
 using namespace spu::module;
 
 RandomVector::RandomVector(int frame_size) :
-    Module(),
+    Stateful(),
     frame_size(frame_size) {
 
     this->set_name("RandomVector");

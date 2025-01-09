@@ -11,7 +11,7 @@ namespace spu
     namespace module
     {
 
-	class RandomVector  : public Module {      
+	class RandomVector  : public Stateful {      
   
 	private:
     
