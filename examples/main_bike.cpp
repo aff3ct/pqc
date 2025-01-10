@@ -9,31 +9,31 @@
 #include <flint/fmpz.h>		/* large integers */
 #include <flint/fq.h>		/* finite fields */
 
-#include "flint/fq_poly.h"	/* pol. in finite fields */
-#include "flint/fmpz_poly.h"	/* pol. in integers */
-#include "flint/fmpz_vec.h"	/* vectors integers */
-#include "flint/fq_vec.h"	/* vectors finite fields */
-#include "flint/perm.h"		/* permutations */
-#include "flint/fq_mat.h"	/* matrix / finite fields */
+#include <flint/fq_poly.h>	/* pol. in finite fields */
+#include <flint/fmpz_poly.h>	/* pol. in integers */
+#include <flint/fmpz_vec.h>	/* vectors integers */
+#include <flint/fq_vec.h>	/* vectors finite fields */
+#include <flint/perm.h>		/* permutations */
+#include <flint/fq_mat.h>	/* matrix / finite fields */
 
 
-#include "common/Tools/tools.hpp"
-#include "common/Tools/codes.hpp"
-
-
-
-#include "Tools/Bike/Bike_secret_key.hpp"
-#include "Tools/Bike/Bike_public_key.hpp"
-#include "Tools/Bike/Bike_keygen.hpp"
+#include <Tools/tools.hpp>
+#include <Tools/codes.hpp>
 
 
 
-#include "Modules/RandomVector/RandomVector.hpp"
-#include "Modules/Comparator/Comparator.hpp"
-#include "Modules/SyndComparator/SyndComparator.hpp"
-#include "Modules/Bike_RandomFixedWeight/Bike_RandomFixedWeight.hpp"
-#include "Modules/Bike_Encoder/Bike_Encoder.hpp"
-#include "Modules/Bike_Decoder/Bike_Decoder.hpp"
+#include <Tools/Bike/Bike_secret_key.hpp>
+#include <Tools/Bike/Bike_public_key.hpp>
+#include <Tools/Bike/Bike_keygen.hpp>
+
+
+
+#include <Modules/RandomVector/RandomVector.hpp>
+#include <Modules/Comparator/Comparator.hpp>
+#include <Modules/SyndComparator/SyndComparator.hpp>
+#include <Modules/Bike_RandomFixedWeight/Bike_RandomFixedWeight.hpp>
+#include <Modules/Bike_Encoder/Bike_Encoder.hpp>
+#include <Modules/Bike_Decoder/Bike_Decoder.hpp>
 
 
 using namespace spu;

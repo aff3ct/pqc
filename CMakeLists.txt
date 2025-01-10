@@ -84,16 +84,16 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/common"
         FILES_MATCHING PATTERN "*.hxx")
 
 # Examples
-add_executable(pqc-example ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+add_executable(pqc-example ${CMAKE_CURRENT_SOURCE_DIR}/examples/main.cpp)
 target_link_libraries(pqc-example pqc-static-lib)
 
-add_executable(pqc-bike ${CMAKE_CURRENT_SOURCE_DIR}/src/main_bike.cpp)
+add_executable(pqc-bike ${CMAKE_CURRENT_SOURCE_DIR}/examples/main_bike.cpp)
 target_link_libraries(pqc-bike PRIVATE pqc-static-lib)
 
-add_executable(pqc-cm ${CMAKE_CURRENT_SOURCE_DIR}/src/main_cm.cpp)
+add_executable(pqc-cm ${CMAKE_CURRENT_SOURCE_DIR}/examples/main_cm.cpp)
 target_link_libraries(pqc-cm PRIVATE pqc-static-lib)
 
-add_executable(pqc-hqc ${CMAKE_CURRENT_SOURCE_DIR}/src/main_hqc.cpp)
+add_executable(pqc-hqc ${CMAKE_CURRENT_SOURCE_DIR}/examples/main_hqc.cpp)
 target_link_libraries(pqc-hqc PRIVATE pqc-static-lib)
 
 install(TARGETS pqc-bike pqc-cm pqc-hqc
