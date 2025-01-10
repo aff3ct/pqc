@@ -1,7 +1,7 @@
 #ifndef SYNDCOMPARATOR_H
 #define SYNDCOMPARATOR_H
 
-#include "streampu.hpp"
+#include <streampu.hpp>
 
 namespace spu
 {

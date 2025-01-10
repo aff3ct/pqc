@@ -2,31 +2,32 @@ cmake_minimum_required(VERSION 3.22.1)
 
 project (pqc LANGUAGES CXX)
 
+# set CMAKE_INSTALL_BINDIR, CMAKE_INSTALL_LIBDIR, CMAKE_INSTALL_INCLUDEDIR and CMAKE_INSTALL_DATAROOTDIR variables
+include(GNUInstallDirs)
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Link with the "Threads library (required to link with streampu after)
+## StreamPU runtime system
+
+### Link with the "Threads library (required to link with StreamPU after)
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-# ##########
-# streampu
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/streampu/include/streampu.hpp")
+    message(STATUS "Using sub-project StreamPU in ${CMAKE_CURRENT_SOURCE_DIR}/streampu/")
     option(SPU_COMPILE_STATIC_LIB "" ON)
     option(SPU_COMPILE_SHARED_LIB "" OFF)
+    option(SPU_TESTS "" OFF)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/streampu/)
-
-    message(STATUS "Sub-project found: streampu")
+    set(PQC_SPU_LIB spu-static-lib)
 else()
-    message(FATAL_ERROR "streampu can't be found, try to init the submodule with the following cmd:\n"
-                        "$ git submodule update --init --recursive")
+    message(STATUS "Looking for pre-installed StreamPU")
+    find_package(cpptrace REQUIRED)
+    find_package(StreamPU REQUIRED)
+    set(PQC_SPU_LIB spu::spu-static-lib)
 endif()
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/streampu/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/streampu/lib/rang/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/streampu/lib/cpptrace/include)
-link_libraries(spu-static-lib)
 
 # ##########
 
@@ -38,9 +39,49 @@ pkg_check_modules(FLINT REQUIRED flint)
 file(GLOB_RECURSE COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/common/*)
 add_library(pqc-static-lib STATIC ${COMMON_SRC})
 
-target_include_directories(pqc-static-lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/common)
+target_include_directories(pqc-static-lib PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/common>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/pqc}>)
+target_link_libraries(pqc-static-lib ${PQC_SPU_LIB})
 target_link_libraries(pqc-static-lib ${FLINT_STATIC_LIBRARIES})
 target_link_options(pqc-static-lib PUBLIC ${FLINT_STATIC_LDFLAGS})
+
+install(TARGETS pqc-static-lib
+        EXPORT pqc-config
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/
+        COMPONENT library)
+
+install(EXPORT
+        pqc-config
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/pqc"
+        NAMESPACE pqc::
+        COMPONENT library)
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
+        COMPONENT headers
+        FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
+        COMPONENT headers
+        FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
+        COMPONENT headers
+        FILES_MATCHING PATTERN "*.hxx")
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/common"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
+        COMPONENT headers
+        FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/common"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
+        COMPONENT headers
+        FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/common"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
+        COMPONENT headers
+        FILES_MATCHING PATTERN "*.hxx")
 
 # Examples
 add_executable(pqc-example ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
@@ -54,4 +95,8 @@ target_link_libraries(pqc-cm PRIVATE pqc-static-lib)
 
 add_executable(pqc-hqc ${CMAKE_CURRENT_SOURCE_DIR}/src/main_hqc.cpp)
 target_link_libraries(pqc-hqc PRIVATE pqc-static-lib)
+
+install(TARGETS pqc-bike pqc-cm pqc-hqc
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pqc/examples"
+    COMPONENT examples)
 

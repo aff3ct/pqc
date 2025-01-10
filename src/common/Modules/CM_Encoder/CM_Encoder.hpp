@@ -1,7 +1,7 @@
 #ifndef CM_ENCODER_H
 #define CM_ENCODER_H
 
-#include "streampu.hpp"
+#include <streampu.hpp>
 
 #include "../../Tools/tools.hpp"
 #include "../../Tools/codes.hpp"

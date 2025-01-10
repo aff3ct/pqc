@@ -1,7 +1,7 @@
 #ifndef HQC_DECODER_H
 #define HQC_DECODER_H
 
-#include "streampu.hpp"
+#include <streampu.hpp>
 
 #include "../../Tools/tools.hpp"
 #include "../../Tools/codes.hpp"

@@ -1,7 +1,7 @@
 #ifndef CM_DECODER_H
 #define CM_DECODER_H
 
-#include "../../../../streampu/include/streampu.hpp"
+#include <streampu.hpp>
 #include "../../Tools/tools.hpp"
 #include "../../Tools/codes.hpp"
 #include "../../Tools/ClassicMcEliece/CM_secret_key.hpp"

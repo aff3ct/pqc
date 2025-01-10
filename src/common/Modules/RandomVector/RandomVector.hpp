@@ -1,7 +1,7 @@
 #ifndef RANDOMVECTOR_H
 #define RANDOMVECTOR_H
 
-#include "streampu.hpp"
+#include <streampu.hpp>
 
 #include "../../Tools/tools.hpp"
 

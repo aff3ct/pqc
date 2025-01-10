@@ -1,7 +1,7 @@
 #ifndef BIKE_RANDOMFIXEDWEIGHT_H
 #define BIKE_RANDOMFIXEDWEIGHT_H
 
-#include "streampu.hpp"
+#include <streampu.hpp>
 
 #include "../../Tools/tools.hpp"
 

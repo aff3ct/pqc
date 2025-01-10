@@ -1,7 +1,7 @@
 #ifndef COMPARATOR_H
 #define COMPARATOR_H
 
-#include "streampu.hpp"
+#include <streampu.hpp>
 
 namespace spu
 {

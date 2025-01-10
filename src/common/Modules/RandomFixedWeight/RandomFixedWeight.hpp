@@ -1,7 +1,7 @@
 #ifndef RANDOMFIXEDWEIGHT_H
 #define RANDOMFIXEDWEIGHT_H
 
-#include "streampu.hpp"
+#include <streampu.hpp>
 
 #include "../../Tools/tools.hpp"
 

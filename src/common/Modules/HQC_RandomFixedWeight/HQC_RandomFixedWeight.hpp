@@ -1,7 +1,7 @@
 #ifndef HQC_RANDOMFIXEDWEIGHT_H
 #define HQC_RANDOMFIXEDWEIGHT_H
 
-#include "streampu.hpp"
+#include <streampu.hpp>
 
 #include "../../Tools/tools.hpp"
 
