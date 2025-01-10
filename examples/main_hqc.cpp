@@ -16,22 +16,7 @@
 #include <flint/perm.h>		/* permutations */
 #include <flint/fq_mat.h>	/* matrix / finite fields */
 
-
-#include <Tools/tools.hpp>
-#include <Tools/codes.hpp>
-
-
-#include <Tools/HQC/HQC_secret_key.hpp>
-#include <Tools/HQC/HQC_public_key.hpp>
-#include <Tools/HQC/HQC_keygen.hpp>
-
-
-#include <Modules/RandomVector/RandomVector.hpp>
-#include <Modules/Comparator/Comparator.hpp>
-#include <Modules/SyndComparator/SyndComparator.hpp>
-#include <Modules/HQC_Encoder/HQC_Encoder.hpp>
-#include <Modules/HQC_Decoder/HQC_Decoder.hpp>
-
+#include <pqc.h>
 
 using namespace spu;
 using namespace spu::module;

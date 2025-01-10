@@ -36,11 +36,11 @@ find_package(PkgConfig)
 pkg_check_modules(FLINT REQUIRED flint)
 
 # pqc lib
-file(GLOB_RECURSE COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/common/*)
+file(GLOB_RECURSE COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
 add_library(pqc-static-lib STATIC ${COMMON_SRC})
 
 target_include_directories(pqc-static-lib PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/common>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/pqc}>)
 target_link_libraries(pqc-static-lib ${PQC_SPU_LIB})
 target_link_libraries(pqc-static-lib ${FLINT_STATIC_LIBRARIES})
@@ -60,28 +60,7 @@ install(EXPORT
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
         COMPONENT headers
-        FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
-        COMPONENT headers
         FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
-        COMPONENT headers
-        FILES_MATCHING PATTERN "*.hxx")
-
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/common"
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
-        COMPONENT headers
-        FILES_MATCHING PATTERN "*.h")
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/common"
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
-        COMPONENT headers
-        FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/common"
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
-        COMPONENT headers
-        FILES_MATCHING PATTERN "*.hxx")
 
 # Examples
 add_executable(pqc-example ${CMAKE_CURRENT_SOURCE_DIR}/examples/main.cpp)
