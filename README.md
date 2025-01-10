@@ -23,9 +23,9 @@ The library and examples should be compiled as follows:
 ```shell
 export PKG_CONFIG_PATH="<FLINT and dependencies pkgconfig dirs>:${PKG_CONFIG_PATH}"
 export CMAKE_PREFIX_PATH="<StreamPU install dir prefix>:${CMAKE_PREFIX_PATH}"
-cmake -DCMAKE_INSTALL_PREFIX='<PQC install dir prefix>' -S <PQC source dir> -B <PQC build dir>
-cmake --build <PQC build dir>
-cmake --install <PQC build dir>
+cmake -DCMAKE_INSTALL_PREFIX='<PQC install dir prefix>' -S '<PQC source dir>' -B '<PQC build dir>'
+cmake --build '<PQC build dir>'
+cmake --install '<PQC build dir>'
 ```
 
 ## License
