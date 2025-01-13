@@ -70,27 +70,27 @@ HQC_Encoder:: hqc_encoder(int* input, int* output1, int* output2, const HQC_publ
     fq_poly_t res2; fq_poly_init(res2, *ctx_q); 
 
 
-    printf("just before encoding \n");
+    //printf("just before encoding \n");
     
     /* encoding */
     HQC_encoding(res1, res2, tmp_pol, PK.h, PK.s, PK.alpha, this->output_size1,
 		 this->output_size2, this->n1, this->r, this->w, this->w, *ctx,
 		 *ctx_q);
 
-    printf("just after encoding \n");
+    //printf("just after encoding \n");
 	
     /* put it in vec format */
     _fq_vec_zero(tmp_vec1, this->output_size1, *ctx_q);
     fq_poly_get_coeffs(tmp_vec1, res1, this->output_size1, *ctx_q);
     fq_poly_get_coeffs(tmp_vec2, res2, this->output_size2, *ctx_q);
 
-    printf("just after vec format \n");
+    //printf("just after vec format \n");
     
     /* reverse conversion F_2 to int */
     _fq_vec_2_int(output1, tmp_vec1, this->output_size1, *ctx_q);
     _fq_vec_2_int(output2, tmp_vec2, this->output_size2, *ctx_q);
 
-    printf("just after conversion \n");
+    //printf("just after conversion \n");
 
     /* clear memory */
     /* _fq_vec_clear(tmp_e, this->frame_size, *ctx_q); */

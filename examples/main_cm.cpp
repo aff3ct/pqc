@@ -40,7 +40,8 @@ int main(int argc, char** argv, char** env) {
     /* ************************************************************************* */
     int m, n, t, tau;
 
-    int level = 1;
+    int level = 5;
+    std::cout << "CM Level : " << level << std::endl;
 
     CM_params(m, n, t, level);
     if ((1 << m) == n) {
@@ -97,10 +98,19 @@ int main(int argc, char** argv, char** env) {
         for (auto t : lt)
 	    {
 		t->set_stats(true);
-		t->set_debug(true);
+		t->set_debug(false);
 	    }
 
+    auto t_start = std::chrono::steady_clock::now();
+
     seq.exec_seq();
+
+    std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
+
+    auto elapsed_time = duration.count() / 1000.f / 1000.f;
+    std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
+
+    tools::Stats::show(seq.get_modules_per_types(), true, false);
 
 
 
