@@ -57,7 +57,7 @@ install(EXPORT
         NAMESPACE pqc::
         COMPONENT library)
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pqc
         COMPONENT headers
         FILES_MATCHING PATTERN "*.hpp")
