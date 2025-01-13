@@ -41,8 +41,8 @@ int main(int argc, char** argv, char** env) {
     fq_ctx_init_conway(ctx, p, m, "x");
     fq_ctx_init_conway(ctx_q, p, 1, "α");
 
-    int level = 1;
-
+    int level = 5;
+    std::cout << "Level : " << level << std::endl;
     /* int k = 16;			/\* degree for RS code *\/ */
     /* int n1 = 46;		/\* length for RS code *\/ */
     /* int n2 = 1 << (m-1);	/\* length of RM(1, m) code *\/ */
@@ -104,13 +104,22 @@ int main(int argc, char** argv, char** env) {
         for (auto t : lt)
 	    {
 		t->set_stats(true);
-		t->set_debug(true);
+		t->set_debug(false);
 	    }
 
-    seq.exec_seq();
+    for(int i = 0; i<10; i++){
+        auto t_start = std::chrono::steady_clock::now();
 
+        seq.exec_seq();
+
+        std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
+
+        auto elapsed_time = duration.count() / 1000.f / 1000.f;
+        std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
+    }
     
-    
+
+    tools::Stats::show(seq.get_modules_per_types(), true, false);
 
 
 

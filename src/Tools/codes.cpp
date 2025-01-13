@@ -615,13 +615,13 @@ Bike_decoding(fq_struct* res, const fq_struct* s, const fq_mat_t& H,
 
     
     for (i = 0; i < NbIter; ++i) {
-	printf("This is the %dth iteration !! \n", i);
+	//printf("This is the %dth iteration !! \n", i);
 	fq_mat_mul_vec(tmp, H, e, n, ctx_q); /* CHANGE THIS : need polynomial
 						manipulation (?) */
 	_fq_vec_add(tmp, tmp, s, r, ctx_q);
 	w = hamming_weight(tmp, r, ctx_q);
 	T = compute_threshold(w, i, r);
-	printf("The threshold is %d\n", T);
+	//printf("The threshold is %d\n", T);
 	
 	BFIter(e, black, gray, tmp , H, T, tau, ctx_q);
 	

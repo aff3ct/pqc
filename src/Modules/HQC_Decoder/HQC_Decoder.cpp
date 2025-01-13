@@ -68,18 +68,18 @@ HQC_Decoder:: hqc_decoder(int* input1, int* input2, int* output, const HQC_secre
     _int_vec_2_fq(tmp_vec2, input2, this->input_size2, *ctx_q);
     fq_poly_set_coeffs(in2, tmp_vec2, this->input_size2, *ctx_q);
 
-    printf("just before decoding \n");
+    //printf("just before decoding \n");
     
     /* decoding */
     HQC_decoding(res, in1, in2, SK.y, PK.alpha, this->input_size1, PK.get_n1(),
 		 this->output_size, this->r, *ctx, *ctx_q);
 
-    printf("just after decoding \n");
+    //printf("just after decoding \n");
     
     /* put it in vec format */
     fq_poly_get_coeffs(tmp_vec, res, this->output_size, *ctx_q);
 
-    printf("just before conversion \n");
+    //printf("just before conversion \n");
     /* reverse conversion F_2 to int */
     _fq_vec_2_int(output, tmp_vec, this->output_size, *ctx_q);
 

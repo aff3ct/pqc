@@ -50,8 +50,9 @@ int main(int argc, char** argv, char** env) {
     int r = 0;
 #endif
 
-    int level = 5;
+    int level = 1;
 
+    std::cout << "BIKE Level : " << level << std::endl;
     
     int weight = 0;
     int error_weight = 0;
@@ -107,10 +108,22 @@ int main(int argc, char** argv, char** env) {
         for (auto t : lt)
 	    {
 		t->set_stats(true);
-		t->set_debug(true);
+		t->set_debug(false);
 	    }
 
-    seq.exec_seq();
+    for(int i = 0; i<10; i++){
+        auto t_start = std::chrono::steady_clock::now();
+
+        seq.exec_seq();
+
+        std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - t_start;
+
+        auto elapsed_time = duration.count() / 1000.f / 1000.f;
+        std::cout << "Sequence elapsed time: " << elapsed_time << " ms" << std::endl;
+    }
+    
+
+    tools::Stats::show(seq.get_modules_per_types(), true, false);
     
     
     
