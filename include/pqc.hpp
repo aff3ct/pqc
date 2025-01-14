@@ -1,5 +1,5 @@
-#ifndef __PQC_H
-#define __PQC_H
+#ifndef __PQC_HPP
+#define __PQC_HPP
 
 #include <Tools/tools.hpp>
 #include <Tools/codes.hpp>

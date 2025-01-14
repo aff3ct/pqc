@@ -45,6 +45,7 @@ target_include_directories(pqc-static-lib PUBLIC
 target_link_libraries(pqc-static-lib ${PQC_SPU_LIB})
 target_link_libraries(pqc-static-lib ${FLINT_STATIC_LIBRARIES})
 target_link_options(pqc-static-lib PUBLIC ${FLINT_STATIC_LDFLAGS})
+set_target_properties(pqc-static-lib PROPERTIES OUTPUT_NAME "pqc")
 
 install(TARGETS pqc-static-lib
         EXPORT pqc-config

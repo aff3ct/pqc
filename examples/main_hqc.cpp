@@ -16,7 +16,7 @@
 #include <flint/perm.h>		/* permutations */
 #include <flint/fq_mat.h>	/* matrix / finite fields */
 
-#include <pqc.h>
+#include <pqc.hpp>
 
 using namespace spu;
 using namespace spu::module;
