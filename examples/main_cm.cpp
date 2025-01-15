@@ -40,8 +40,8 @@ int main(int argc, char** argv, char** env) {
     /* ************************************************************************* */
     int m, n, t, tau;
 
-    int level = 5;
-    std::cout << "CM Level : " << level << std::endl;
+    int level = 1;
+    std::cout << "CM Level: " << level << std::endl;
 
     CM_params(m, n, t, level);
     if ((1 << m) == n) {

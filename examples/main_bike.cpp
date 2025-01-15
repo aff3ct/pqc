@@ -52,7 +52,7 @@ int main(int argc, char** argv, char** env) {
 
     int level = 1;
 
-    std::cout << "BIKE Level : " << level << std::endl;
+    std::cout << "BIKE Level: " << level << std::endl;
     
     int weight = 0;
     int error_weight = 0;

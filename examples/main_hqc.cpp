@@ -41,8 +41,8 @@ int main(int argc, char** argv, char** env) {
     fq_ctx_init_conway(ctx, p, m, "x");
     fq_ctx_init_conway(ctx_q, p, 1, "α");
 
-    int level = 5;
-    std::cout << "Level : " << level << std::endl;
+    int level = 1;
+    std::cout << "HQC Level: " << level << std::endl;
     /* int k = 16;			/\* degree for RS code *\/ */
     /* int n1 = 46;		/\* length for RS code *\/ */
     /* int n2 = 1 << (m-1);	/\* length of RM(1, m) code *\/ */
