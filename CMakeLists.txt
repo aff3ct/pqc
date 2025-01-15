@@ -64,9 +64,6 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
         FILES_MATCHING PATTERN "*.hpp")
 
 # Examples
-add_executable(pqc-example ${CMAKE_CURRENT_SOURCE_DIR}/examples/main.cpp)
-target_link_libraries(pqc-example pqc-static-lib)
-
 add_executable(pqc-bike ${CMAKE_CURRENT_SOURCE_DIR}/examples/main_bike.cpp)
 target_link_libraries(pqc-bike PRIVATE pqc-static-lib)
 
