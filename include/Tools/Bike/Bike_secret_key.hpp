@@ -8,18 +8,16 @@
 class Bike_secret_key {
 private:
     int r;
-    fq_ctx_t* ctx_q;
 
     
 public:
-    fq_poly_t h0;
-    fq_poly_t h1;
+    GF2X h0;
+    GF2X h1;
 
-    Bike_secret_key(int r, fq_ctx_t* ctx_q);
+    Bike_secret_key(int r);
     ~Bike_secret_key();
 
     int get_r() const;
-    fq_ctx_t* get_ctx_q() const;
 
 
     /* Parameters as in the Bike specification document

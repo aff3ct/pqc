@@ -36,6 +36,7 @@ namespace spu
 				    const int frame_id);
 
 	}; 
+
     }
 }
 

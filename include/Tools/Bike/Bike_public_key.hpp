@@ -8,17 +8,14 @@
 class Bike_public_key {
 private:
     int r;
-    fq_ctx_t* ctx_q;
 
 public:
-    fq_poly_t h;
+    GF2X h;
 
-    Bike_public_key(int r, fq_ctx_t* ctx_q);
+    Bike_public_key(int r);
     ~Bike_public_key();
 
     int get_r() const;
-    fq_ctx_t* get_ctx_q() const;
-
     
     int keygen(const Bike_secret_key& sk);
 };

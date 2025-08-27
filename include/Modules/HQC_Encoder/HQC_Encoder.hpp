@@ -8,8 +8,6 @@
 #include "../../Tools/HQC/HQC_secret_key.hpp"
 #include "../../Tools/HQC/HQC_public_key.hpp"
 
-
-
 namespace spu
 {
     namespace module
@@ -20,7 +18,7 @@ namespace spu
       
 	private:
 	    
-	    int frame_size;    	/* it is k in HQC */
+	    int frame_size;    	/* number of bytes */
 	    int output_size1;	/* it is n in HQC */
 	    int output_size2;	/* it is n1 * n2 in HQC */
 
@@ -29,7 +27,6 @@ namespace spu
 	    int w;		/* weight of e, r1, r2 */
 	    
 
-	    
 	public:
 	    
 	    HQC_Encoder(HQC_public_key& PK, int k, int len, int r, int w);
@@ -38,7 +35,7 @@ namespace spu
       
 	protected:
 
-	    virtual void hqc_encoder(int* input, int* output1, int* output2, const HQC_public_key& PK,
+	    virtual void hqc_encoder(int* input, uint64_t* output1, uint64_t* output2, const HQC_public_key& PK,
 				     const int frame_id);
 
 	}; 

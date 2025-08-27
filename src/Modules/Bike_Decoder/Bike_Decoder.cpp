@@ -39,39 +39,15 @@ void
 Bike_Decoder:: bike_decoder(int* input, int* output, const Bike_secret_key& SK,
 			    const int frame_id) {
 
-    fq_ctx_t* ctx_q = SK.get_ctx_q(); /* finite field F_2 */
     int r = this->input_size;
-    fq_poly_t P; fq_poly_init(P, *ctx_q); fq_poly_set_cyclic(P, r, *ctx_q);
-    
-    /* transform syndrome from vector to polynomial  */
-    fq_struct* s =  _fq_vec_init(r, *ctx_q);
-    _int_vec_2_fq(s, input, r, *ctx_q);
 
-    /* compute s = s * h0 mod P */
-    fq_poly_t sp; fq_poly_init(sp, *ctx_q); fq_poly_zero(sp, *ctx_q);
-    fq_poly_set_coeffs(sp, s, r, *ctx_q);
-    fq_poly_mulmod(sp, sp, SK.h0, P, *ctx_q);
+    GF2X P = gf2x_set_cyclic(r); /* X^r + 1 */ 
+    vec_GF2 res; res.SetMaxLength(this->frame_size); res.SetLength(this->frame_size);
 
-    /* put sp in a vector (maybe should not ?) */
-    fq_struct* ss = _fq_vec_init(r, *ctx_q);
-    for (int k = 0; k < r; k++) {
-	fq_poly_get_coeff(&ss[k], sp, k, *ctx_q);
-    }
-
-    /* decoding */
-    fq_struct* res = _fq_vec_init(this->frame_size, *ctx_q);
-    int b = Bike_decoding_v2(res, ss, SK.h0, SK.h1, r, (this->weight)/2,
-			     this->NbIter, this->tau, *ctx_q);
-
+    GF2X s = int_vec_to_GF2X(input,r); /* Converts input into a GF2 polynomial */
+    s = MulMod(s,SK.h0,P);        
     
-    /* reverse conversion F_2 to int */
-    _fq_vec_2_int(output, res, this->frame_size, *ctx_q);
+    int b = Bike_decoding_v2(res, s, SK.h0, SK.h1,r,(this->weight)/2, this->NbIter, this->tau);
+    vec_gf2_to_int(res,output);
     
-    
-    /* clear memory */
-    fq_poly_clear(P, *ctx_q);
-    fq_poly_clear(sp, *ctx_q);
-    _fq_vec_clear(s, r, *ctx_q);
-    _fq_vec_clear(ss, r, *ctx_q);
-    _fq_vec_clear(res, r, *ctx_q);
 }

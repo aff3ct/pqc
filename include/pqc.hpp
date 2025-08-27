@@ -3,6 +3,7 @@
 
 #include <Tools/tools.hpp>
 #include <Tools/codes.hpp>
+#include <Tools/tools_fq.hpp>
 
 
 #include <Tools/ClassicMcEliece/CM_secret_key.hpp>

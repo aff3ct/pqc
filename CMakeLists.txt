@@ -29,11 +29,19 @@ else()
     set(PQC_SPU_LIB spu::spu-static-lib)
 endif()
 
-# ##########
-
-# Flint Library
+# Flint lib
 find_package(PkgConfig)
 pkg_check_modules(FLINT REQUIRED flint)
+pkg_check_modules(GF2X REQUIRED gf2x)
+
+# ##########
+# NTL
+find_library(NTL_STATIC_LIBRARY ntl PATHS "$ENV{NTL_DIR}/lib")
+
+## Check
+if (NOT NTL_STATIC_LIBRARY)
+    message(FATAL_ERROR "NTL library not found in $ENV{NTL_DIR}/lib")
+endif()
 
 # pqc lib
 file(GLOB_RECURSE COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*)
@@ -44,7 +52,13 @@ target_include_directories(pqc-static-lib PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/pqc}>)
 target_link_libraries(pqc-static-lib ${PQC_SPU_LIB})
 target_link_libraries(pqc-static-lib ${FLINT_STATIC_LIBRARIES})
+target_link_libraries(pqc-static-lib ${GF2X_STATIC_LIBRARIES})
+target_include_directories(pqc-static-lib PUBLIC "$ENV{NTL_DIR}/include")
+target_link_libraries(pqc-static-lib ${NTL_STATIC_LIBRARY})
+
 target_link_options(pqc-static-lib PUBLIC ${FLINT_STATIC_LDFLAGS})
+target_link_options(pqc-static-lib PUBLIC ${GF2X_STATIC_LDFLAGS})
+
 set_target_properties(pqc-static-lib PROPERTIES OUTPUT_NAME "pqc")
 
 install(TARGETS pqc-static-lib
@@ -73,7 +87,6 @@ target_link_libraries(pqc-cm PRIVATE pqc-static-lib)
 add_executable(pqc-hqc ${CMAKE_CURRENT_SOURCE_DIR}/examples/main_hqc.cpp)
 target_link_libraries(pqc-hqc PRIVATE pqc-static-lib)
 
-install(TARGETS pqc-bike pqc-cm pqc-hqc
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pqc/examples"
+install(TARGETS pqc-bike pqc-cm pqc-hqc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pqc/examples"
     COMPONENT examples)
 

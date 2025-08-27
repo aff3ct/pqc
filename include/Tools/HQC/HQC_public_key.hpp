@@ -16,24 +16,17 @@ private:
     int n;      
     int n1;
     
-    fq_ctx_t* ctx;
-    fq_ctx_t* ctx_q;
-    
-    
 
-public:
-    fq_poly_t h;
-    fq_poly_t s;
-    fq_struct* alpha;
+public:    
+    GF2X h;
+    GF2X s;
+    vec_GF2E alpha;
     
-    HQC_public_key(int n, int n1, fq_ctx_t* ctx, fq_ctx_t* ctx_q);
+    HQC_public_key(int n, int n1);
     ~HQC_public_key();
 
     int get_n() const;
     int get_n1() const;
-    fq_ctx_t* get_ctx_q() const;
-    fq_ctx_t* get_ctx() const;
-
     
     void keygen(const HQC_secret_key& sk, flint_rand_t state);
 };

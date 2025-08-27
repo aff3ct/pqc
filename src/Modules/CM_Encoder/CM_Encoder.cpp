@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Modules/CM_Encoder/CM_Encoder.hpp"
 
+
 using namespace spu;
 using namespace spu::module;
 using namespace std;
@@ -10,14 +11,13 @@ CM_Encoder:: CM_Encoder(int frame_size, int out_size, CM_public_key& PK) :
     frame_size(frame_size),
     out_size(out_size) {
 
+    
     this->set_name("CM_Encoder");
     this->set_short_name("CM_Encoder");
 
     auto &t = create_task("cm_encoder");
     auto input   = create_socket_in<int>(t, "input", frame_size);
     auto output  = create_socket_out<int>(t, "output", out_size);
-
-
     
     this->create_codelet(t, [input, output, &PK](Module &m, runtime::Task &t,
 						const size_t frame_id) -> int {
@@ -34,26 +34,26 @@ CM_Encoder:: CM_Encoder(int frame_size, int out_size, CM_public_key& PK) :
 CM_Encoder:: ~CM_Encoder() {
 }
 
-
 void
 CM_Encoder:: cm_encoder(int* input, int* output, const CM_public_key& PK, const int frame_id) {
-    fq_ctx_t* ctx_q = PK.get_ctx_q(); /* finite field F_2 */
-
-    /* temp vectors for conversion between F_2 and int values */
-    fq_struct* tmp_e = _fq_vec_init(this->frame_size, *ctx_q);
-    fq_struct* tmp_s = _fq_vec_init(this->out_size, *ctx_q);
-
+    vec_GF2 s(INIT_SIZE,this->out_size); s.SetLength(this->out_size); 
+    vec_GF2 e(INIT_SIZE,this->frame_size); e.SetLength(this->frame_size); 
     
-    /* conversion int to F_2 */
-    _int_vec_2_fq(tmp_e, input, this->frame_size, *ctx_q);
+    /* Sizes for bit-stacking in integers and bytes */ 
+    /* Input */
+    int frame_size_int = (frame_size + 63) / 64;
+    int frame_size_byte = (frame_size + 7) / 8;
+    /* Output */
+    int out_size_bytes = (this->out_size + 7) /8;
 
-    /* encoding */
-    CM_encoding(tmp_s, tmp_e, PK.T, this->frame_size, *ctx_q);
+    uint64_t input_int[frame_size_int];
+    bit_to_uint(input_int,input,frame_size);
+    e = VectorCopy(GF2XFromBytes((uint8_t*)input_int,frame_size_byte),this->frame_size);
 
-    /* reverse conversion F_2 to int */
-    _fq_vec_2_int(output, tmp_s, this->out_size, *ctx_q);
-    
-    /* clear memory */
-    _fq_vec_clear(tmp_e, this->frame_size, *ctx_q);
-    _fq_vec_clear(tmp_s, this->out_size, *ctx_q);
+    /* Encoding */
+    CM_encoding(s,PK.T,e);
+
+    uint8_t output_bytes[out_size_bytes];
+    BytesFromGF2X(output_bytes, conv<GF2X>(s), out_size_bytes);
+    memcpy(output,output_bytes,out_size_bytes);
 }

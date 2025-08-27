@@ -8,19 +8,16 @@
 class CM_secret_key {
 private:
     int n;
-    fq_ctx_t* ctx;
-    fq_struct* alpha;
+    vec_GF2E alpha;
 
 public:
-    fq_poly_t g;
+    GF2EX g;
 
-    CM_secret_key(int m, fq_ctx_t* ctx);
+    CM_secret_key(int m);
     ~CM_secret_key();
 
     int get_n() const;
-    fq_struct* get_alpha() const;
-    fq_ctx_t* get_ctx() const;
-
+    vec_GF2E get_alpha() const;
 
   /* Parameters as in the Classic McEliece specification document
      alpha and g are assumed to be initialised

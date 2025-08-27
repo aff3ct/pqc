@@ -34,6 +34,7 @@ CM_RandomFixedWeight::~CM_RandomFixedWeight() {
 void CM_RandomFixedWeight::random_fixed_weight(int* input, int* output, const int frame_id) { 
 
     int e[frame_size];
+    int output_tmp[frame_size];
     for (auto i = 0; i < frame_size; i++) {
 	output[i] = input[i];
 	e[i] = 0;

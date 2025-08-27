@@ -12,23 +12,18 @@ class HQC_secret_key {
 
 private:
     int n;
-    fq_ctx_t* ctx_q;
-
     
 public:
-    fq_poly_t x;
-    fq_poly_t y;
+    GF2X x;
+    GF2X y;
 
-    HQC_secret_key(int n, fq_ctx_t* ctx_q);
+    HQC_secret_key(int n);
     ~HQC_secret_key();
 
     int get_n() const;
-    fq_ctx_t* get_ctx_q() const;
-
 
     void keygen(const int w);
     
 };
-
 
 #endif /* HQC_SECRET_KEY_HPP */

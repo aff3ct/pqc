@@ -37,7 +37,7 @@ namespace spu
       
 	protected:
 
-	    virtual void hqc_decoder(int* input1, int* input2, int* output, const HQC_secret_key& SK,
+	    virtual void hqc_decoder(uint64_t* input1, uint64_t* input2, int* output, const HQC_secret_key& SK,
 				     const HQC_public_key& PK, const int frame_id);
 
 	}; 

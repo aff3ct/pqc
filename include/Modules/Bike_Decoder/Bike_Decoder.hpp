@@ -9,7 +9,6 @@
 #include "../../Tools/Bike/Bike_public_key.hpp"
 
 
-
 namespace spu
 {
     namespace module
@@ -21,11 +20,11 @@ namespace spu
 	private:
     
 	    int frame_size;    	/* it is 2*r in Bike : output_size */
-	    int input_size;	/* it is r in Bike */
+	    int input_size;		/* it is r in Bike */
     
-	    int weight;		/* hamming weight of the secret key ? */
+	    int weight;			/* hamming weight of the secret key ? */
 	    int NbIter;	      	/* nb of iterations in BGF algo. */
-	    int tau;		/* tau for BGF algo. */
+	    int tau;			/* tau for BGF algo. */
 	    
 	public:
       

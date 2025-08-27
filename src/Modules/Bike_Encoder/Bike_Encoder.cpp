@@ -35,30 +35,11 @@ Bike_Encoder:: ~Bike_Encoder() {
 void
 Bike_Encoder:: bike_encoder(int* input, int* output, const Bike_public_key& PK,
 			    const int frame_id) {
-    fq_ctx_t* ctx_q = PK.get_ctx_q(); /* finite field F_2 */
+    GF2X s(INIT_SIZE,this->output_size);
+    s.SetLength(this->output_size);
 
-    fq_t tmp; fq_init(tmp, *ctx_q);
-    
-    /* temporary vectors for conversion between F_2 and int values */
-    fq_struct* tmp_s = _fq_vec_init(this->output_size, *ctx_q);
+    Bike_encoding(s,input,PK.h,this->output_size); /* Encoding */
 
-    fq_poly_t s;
-    fq_poly_init(s, *ctx_q); 
-    
-    /* encoding */
-    Bike_encoding(s, input, PK.h, this->output_size, *ctx_q);
+    GF2X_to_int(s,output,this->output_size); /* Converts GF2X polynomial output to int vec */
 
-    /* put it in vec format */
-    for (int i = 0; i < this->output_size; ++i) {
-	fq_poly_get_coeff(&tmp_s[i], s, i, *ctx_q);
-	/* fq_set(tmp_s[i], tmp, *ctx_q); */
-    }
-    
-    /* reverse conversion F_2 to int */
-    _fq_vec_2_int(output, tmp_s, this->output_size, *ctx_q);
-    
-    /* clear memory */
-    /* _fq_vec_clear(tmp_e, this->frame_size, *ctx_q); */
-    _fq_vec_clear(tmp_s, this->output_size, *ctx_q);
-    fq_poly_clear(s, *ctx_q);
 }

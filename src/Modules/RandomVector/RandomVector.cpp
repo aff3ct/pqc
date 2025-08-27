@@ -29,6 +29,5 @@ RandomVector::~RandomVector() {
 }    
 
 void RandomVector::random_vector(int* input, int* output, const int frame_id) { 
-    random_bits(output, this->frame_size);
-     
+    random_bytes(output, this->frame_size);
 }

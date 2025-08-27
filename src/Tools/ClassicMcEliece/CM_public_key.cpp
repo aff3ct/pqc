@@ -5,20 +5,14 @@
 
 using namespace std;
 
-CM_public_key::CM_public_key(int n, int m, int d, fq_ctx_t* ctx_q) {
+CM_public_key::CM_public_key(int n, int m, int d) {
     this->n = n;
     this->m = m;
     this->d = d;
-    this->ctx_q = ctx_q;
-
-    fq_mat_init(this->T, d * m, n - d * m, *ctx_q);
-    fq_mat_zero(this->T, *ctx_q);
 }
 
 CM_public_key::~CM_public_key() {
-    fq_mat_clear(this->T, *ctx_q);
 }
-
 
 int
 CM_public_key:: get_n() const {
@@ -35,54 +29,58 @@ CM_public_key:: get_d() const {
     return this->d;
 }
 
-fq_ctx_t*
-CM_public_key:: get_ctx_q() const {
-    return this->ctx_q;
-}
-
 
 int
-CM_public_key::keygen(const CM_secret_key& sk, const fq_ctx_t& ctx) {
-    fq_mat_t H, HH, T, I;
+CM_public_key::keygen(const CM_secret_key& sk) {
+mat_GF2E H;
+mat_GF2 HH, I, tmp;
 
-    // fq_ctx_t* ctx = sk.get_ctx();    
-    /* compute parity check matrix over F_qᵐ */
-    fq_mat_init(H, this->d, this->n, ctx);
-    Goppa_parity_check(H, sk.get_alpha(), sk.g, ctx);
-    
-    /* expand parity check matrix */
-    fq_mat_init(HH, (this->m)*(this->d), this->n, *(this->ctx_q));
-    fq_matrix_expand(HH, H, ctx, *(this->ctx_q));
-    
-    int r = fq_mat_rref(HH, HH, *(this->ctx_q));
-    
-    fq_mat_window_init(I, HH, 0, 0, this->d * this->m,
-		       (this->d) * (this->m), *(this->ctx_q));
-    
-    int b = fq_mat_is_one(I, *(this->ctx_q));
-    
-    /* int ptt = fq_mat_print_pretty(T, ctx_q); */
-    if (b != 0) {
-	fq_mat_window_init(T, HH, 0, (this->d) * (this->m), (this->d) * (this->m), (this->n),
-			   *(this->ctx_q));
-	fq_mat_set(this->T, T, *(this->ctx_q));
-	fq_mat_window_clear(T, *(this->ctx_q));
-    }
+H.SetDims(this->d, this->n);
+int dim1 = (this->m) * (this->d);
+int dim2 = this->n - dim1;
 
-    /* clear matrices */
-    fq_mat_clear(H, ctx);
-    fq_mat_clear(HH, *(this->ctx_q));
-    fq_mat_window_clear(I, *(this->ctx_q));
-        
-    return b;
+HH.SetDims(dim1, this->n);
+I.SetDims(dim1, dim1);
+T.SetDims(dim1, dim2);
+
+H = Goppa_parity_check(sk.get_alpha(), sk.g, this->d, this->n);
+
+HH = matrix_expand(H);
+
+int r = gauss(HH);  /* Row echelon */
+rref(HH);           /* Recuded row echelon*/
+
+// for (int i = 0; i < dim1; i++) {
+//     for (int j = 0; j < dim1; j++) {
+//         I[i][j] = HH[i][j];
+//     }
+// }
+
+for (int i = 0; i < dim1; i++) {
+        I[i] = VectorCopy(HH[i], dim1); // truncates to dim1
 }
 
-// fq_mat_t
-// CM_public_key:: get_T() const {
-//     return (this->T);
-// } 
 
-// fq_poly_t&
-// CM_public_key:: get_g() const {
-//     return g;
-// }
+int b = IsIdent(I, dim1);
+
+if (b != 0) {
+    for (int i = 0; i < dim1; i++) {
+        for (int j = dim1; j < (this->n); j++) {
+            T[i][j - dim1] = HH[i][j];
+        }
+    }
+
+    // // Temporary variables for transpose
+    // mat_GF2 HH_tmp = transpose(HH);
+    // mat_GF2 T_tmp = transpose(T);
+
+    // // Copy rows
+    // for (int j = dim1; j < (this->n); j++) {
+    //     T_tmp[j - dim1] = HH_tmp[j];
+    // }
+    
+    // T = transpose(T_tmp);
+}
+
+return b;
+}
